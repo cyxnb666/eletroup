@@ -153,6 +153,7 @@
 import UploadMaterialDialog from './components/UploadMaterialDialog.vue'
 import UploadHistoryDialog from './components/UploadHistoryDialog.vue'
 import VehicleDetailDialog from './components/VehicleDetailDialog.vue'
+import { getInsuranceCompanies } from '@/utils/commonApi'
 
 export default {
   name: 'InsuranceSubsidy',
@@ -178,7 +179,11 @@ export default {
         vhlUsageDicList: [], // 使用性质
         carKindDicList: [], // 机动车种类
         carFuelTypeList: [], // 能源类型
+        premiumPolicyList: [], // 个人信息保护政策
+        busTypeList: [], // 业务类别
+        bmwArcList: [], // 是否购买宝马事故维修补偿产品
         cvrgList: [], // 险种列表
+        newEnergyCvrgList: [], // 新能源险种列表
       },
       queryForm: {
         updateTime: [],
@@ -238,29 +243,23 @@ export default {
 
     // 获取活动列表
     getActivityList() {
-      // TODO: 调用实际API获取活动列表
-      // this.$https('/subsidyActivity/getActivityList', {
-      //   body: {}
-      // }).then(response => {
-      //   if (response) {
-      //     this.activityList = Array.isArray(response.body) ? response.body : (response.body ? [response.body] : []);
-      //     if (this.activityList.length > 0 && !this.activityName) {
-      //       const firstActivity = this.activityList[0];
-      //       this.activityName = firstActivity.activeId;
-      //       this.currentActivity = firstActivity;
-      //       this.fetchSubsidyList();
-      //     }
-      //   }
-      // }).catch(error => {
-      //   console.error('获取活动列表失败:', error);
-      //   this.activityList = [];
-      // });
-
-      // 模拟数据
-      this.activityList = [
-        { activeId: '1', activeName: '2025年三季度买车送保险' },
-        { activeId: '2', activeName: '2025年四季度买车送保险' }
-      ];
+      this.$https('/subsidyActivity/getActivityList', {
+        body: {}
+      }).then(response => {
+        if (response) {
+          this.activityList = Array.isArray(response.body) ? response.body : (response.body ? [response.body] : []);
+          if (this.activityList.length > 0 && !this.activityName) {
+            const firstActivity = this.activityList[0];
+            this.activityName = firstActivity.activeId;
+            this.currentActivity = firstActivity;
+            this.fetchSubsidyList();
+          }
+        }
+      }).catch(error => {
+        console.error('获取活动列表失败:', error);
+        this.activityList = [];
+      });
+      
       if (this.activityList.length > 0) {
         this.activityName = this.activityList[0].activeId;
         this.currentActivity = this.activityList[0];
@@ -268,15 +267,20 @@ export default {
       }
     },
 
-    // 获取保险公司列表
-    getInsuranceCompanies() {
-      // TODO: 调用实际API获取保险公司列表
-      // 模拟数据
-      this.insCompanyList = [
-        { label: '中国人民财产保险股份有限公司', value: '1' },
-        { label: '平安财险', value: '2' },
-        { label: '太平洋保险', value: '3' }
-      ];
+    // 获取保险公司列表 - 使用真实接口
+    async getInsuranceCompanies() {
+      try {
+        const result = await getInsuranceCompanies()
+        if (result && result.length > 0) {
+          this.insCompanyList = result.map(item => ({
+            label: item.insName,
+            value: item.insId,
+          }))
+        }
+      } catch (error) {
+        console.error('获取保险公司列表失败:', error)
+        this.$message.error('获取保险公司列表失败')
+      }
     },
 
     // 刷新活动数据
@@ -336,95 +340,36 @@ export default {
       };
 
       // TODO: 调用实际API
-      // this.$https('/subsidyPolicy/getSubsidyPolicyList', {
-      //   body: params,
-      // }).then(response => {
-      //   this.tableLoading = false;
-      //   if (response) {
-      //     if (response.body) {
-      //       this.tableData = response.body.rows || [];
-      //       this.total = response.body.total || 0;
-      //       
-      //       this.tableData.forEach(row => {
-      //         this.$set(row, 'isSelected', false);
-      //       });
-      //     } else {
-      //       this.tableData = [];
-      //       this.total = 0;
-      //     }
-      //   } else {
-      //     this.$message.error('获取补贴列表失败');
-      //     this.tableData = [];
-      //     this.total = 0;
-      //   }
-      //   this.multipleSelection = [];
-      //   this.checkedAll = false;
-      // }).catch(error => {
-      //   this.tableLoading = false;
-      //   console.error('获取补贴列表失败:', error);
-      //   this.$message.error('获取补贴列表失败');
-      //   this.tableData = [];
-      //   this.total = 0;
-      // });
-
-      // 模拟数据
-      setTimeout(() => {
-        this.tableData = [
-          {
-            id: 1,
-            frameNo: 'FAKEVIN0123456789',
-            deptName: '宝马汽车经销商A',
-            insCompany: '中国人保',
-            policyNo: 'FAKEPN_0123456789',
-            invoiceNo: '2225647',
-            isElectricVehicle: '1',
-            registrationDate: '2025/03/10',
-            updateTime: '2025/03/10 14:00'
-          },
-          {
-            id: 2,
-            frameNo: 'FAKEVIN0123456789',
-            deptName: '宝马汽车经销商B',
-            insCompany: '平安财险',
-            policyNo: 'FAKEPN_0123456789',
-            invoiceNo: '2225648',
-            isElectricVehicle: '0',
-            registrationDate: '2025/03/10',
-            updateTime: '2025/03/10 14:00'
-          },
-          {
-            id: 3,
-            frameNo: 'FAKEVIN0123456789',
-            deptName: '宝马汽车经销商C',
-            insCompany: '太平洋保险',
-            policyNo: 'FAKEPN_0123456789',
-            invoiceNo: '2225649',
-            isElectricVehicle: '1',
-            registrationDate: '2025/03/10',
-            updateTime: '2025/03/10 14:00'
-          },
-          {
-            id: 4,
-            frameNo: 'FAKEVIN0123456789',
-            deptName: '宝马汽车经销商D',
-            insCompany: '太平洋保险',
-            policyNo: 'FAKEPN_0123456789',
-            invoiceNo: '2225650',
-            isElectricVehicle: '0',
-            registrationDate: '2025/03/10',
-            updateTime: '2025/03/10 14:00'
-          }
-        ];
-
-        this.tableData.forEach(row => {
-          this.$set(row, 'isSelected', false);
-        });
-
-        this.total = 4;
+      this.$https('/subsidyPolicy/getSubsidyPolicyList', {
+        body: params,
+      }).then(response => {
         this.tableLoading = false;
+        if (response) {
+          if (response.body) {
+            this.tableData = response.body.rows || [];
+            this.total = response.body.total || 0;
+            
+            this.tableData.forEach(row => {
+              this.$set(row, 'isSelected', false);
+            });
+          } else {
+            this.tableData = [];
+            this.total = 0;
+          }
+        } else {
+          this.$message.error('获取补贴列表失败');
+          this.tableData = [];
+          this.total = 0;
+        }
         this.multipleSelection = [];
         this.checkedAll = false;
-      }, 1000);
+      }).catch(error => {
+        this.tableLoading = false;
+        console.error('获取补贴列表失败:', error);
+        this.$message.error('获取补贴列表失败');
+        this.tableData = [];
+        this.total = 0;
+      });
     },
 
     // 删除选中项
@@ -434,7 +379,7 @@ export default {
         return;
       }
 
-      this.$confirm('是否删除选择的补贴数据？', '提示', {
+      this.$confirm('是否删除选择的保单数据？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
@@ -466,49 +411,35 @@ export default {
         }
 
         // TODO: 调用实际删除API
-        // this.$https('/subsidyPolicy/deleteSubsidyVehicles', {
-        //   body: params
-        // }).then(res => {
-        //   if (res && res.header && res.header.code === '10000') {
-        //     this.$message.success('删除成功');
-        //     this.search(); // 刷新表格数据
-        //   }
-        // }).catch(error => {
-        //   console.error('删除失败:', error);
-        //   this.$message.error('删除失败，请重试');
-        // }).finally(() => {
-        //   this.deleteLoading = false;
-        // });
-
-        // 模拟删除操作
-        setTimeout(() => {
-          this.$message.success('删除成功');
+        this.$https('/subsidyPolicy/deleteSubsidyVehicles', {
+          body: params
+        }).then(res => {
+          if (res && res.header && res.header.code === '10000') {
+            this.$message.success('删除成功');
+            this.search(); // 刷新表格数据
+          }
+        }).catch(error => {
+          console.error('删除失败:', error);
+          this.$message.error('删除失败，请重试');
+        }).finally(() => {
           this.deleteLoading = false;
-          this.search(); // 刷新表格数据
-        }, 1000);
+        });
       }).catch(() => { });
     },
 
     // 获取上传协议内容
     getUploadProtocol() {
-      // TODO: 调用实际API获取协议内容
-      // this.$https('/subsidyPolicy/getUploadProtocol', {
-      //   body: {}
-      // }).then(response => {
-      //   if (response && response.body) {
-      //     const content = response.body.replace(/<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1/g, '<a target="_blank" href=$1$2$1');
-      //     this.protocolContent = content;
-      //   }
-      // }).catch(error => {
-      //   console.error('获取协议失败:', error);
-      // });
-
-      // 模拟协议内容
-      this.protocolContent = `
-        <div class="agreement-text">
-          <p>上传保单前请仔细阅读并确认已与用户签署<a href="javascript:void(0)" class="agreement-link">《宝马个人信息保护政策》</a>：</p>
-        </div>
-      `;
+      // 使用与 activity-upload 相同的接口
+      this.$https('/activityPolicy/getActivityPolicyUploadProtocol', {
+        body: {}
+      }).then(response => {
+        if (response && response.body) {
+          const content = response.body.replace(/<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1/g, '<a target="_blank" href=$1$2$1');
+          this.protocolContent = content;
+        }
+      }).catch(error => {
+        console.error('获取协议失败:', error);
+      });
     },
 
     // 显示上传对话框
@@ -521,45 +452,27 @@ export default {
       this.uploadHistoryVisible = true;
     },
 
-    // 获取字典数据
+    // 获取字典数据 - 使用真实接口
     getDictionaryData() {
-      // TODO: 调用实际API获取字典数据
-      // this.$https('/subsidyPolicy/getBaseInfo', {
-      //   body: {}
-      // }).then(res => {
-      //   if (res && res.body) {
-      //     this.dictionaryData = {
-      //       vhlUsageDicList: res.body.vhlUsageDicList || [],
-      //       carKindDicList: res.body.carKindDicList || [],
-      //       carFuelTypeList: res.body.carFuelTypeList || [],
-      //       cvrgList: res.body.cvrgList || [],
-      //     };
-      //   }
-      // }).catch(error => {
-      //   console.error('获取数据字典失败:', error);
-      // });
-
-      // 模拟字典数据
-      this.dictionaryData = {
-        vhlUsageDicList: [
-          { dicCode: '01', dicName: '非营运' },
-          { dicCode: '02', dicName: '营运' }
-        ],
-        carKindDicList: [
-          { dicCode: '01', dicName: '六座以下客车' },
-          { dicCode: '02', dicName: '六座以上客车' }
-        ],
-        carFuelTypeList: [
-          { dicCode: '01', dicName: '燃油' },
-          { dicCode: '02', dicName: '纯电动' }
-        ],
-        cvrgList: [
-          { dicCode: '0301100', dicName: '机动车损失保险' },
-          { dicCode: '0301600', dicName: '第三者责任保险' },
-          { dicCode: '0301700', dicName: '车上人员责任保险（司机）' },
-          { dicCode: '0301800', dicName: '附加修理期间费用补偿保险' }
-        ]
-      };
+      this.$https('/activityPolicy/getActivityPolicyBaseInfo', {
+        body: {}
+      }).then(res => {
+        if (res && res.body) {
+          // 保存所有字典数据
+          this.dictionaryData = {
+            vhlUsageDicList: res.body.vhlUsageDicList || [],
+            carKindDicList: res.body.carKindDicList || [],
+            carFuelTypeList: res.body.carFuelTypeList || [],
+            premiumPolicyList: res.body.premiumPolicyList || [],
+            busTypeList: res.body.busTypeList || [],
+            bmwArcList: res.body.bmwArcList || [],
+            cvrgList: res.body.cvrgList || [],
+            newEnergyCvrgList: res.body.newEnergyCvrgList || [],
+          };
+        }
+      }).catch(error => {
+        console.error('获取数据字典失败:', error);
+      });
     },
 
     // 查看详情
@@ -572,104 +485,23 @@ export default {
     fetchVehicleDetails(vehicleId) {
       this.loading = true;
 
-      // TODO: 调用实际API获取车辆详情
-      // this.$https('/subsidyPolicy/getVehicleInfo', {
-      //   body: { vehicleId },
-      // }).then(response => {
-      //   if (response && response.body) {
-      //     const data = response.body;
-      //     this.currentVehicleData = this.mapVehicleData(data);
-      //     this.vehicleDetailVisible = true;
-      //   } else {
-      //     this.$message.error('获取车辆信息失败');
-      //   }
-      // }).catch(error => {
-      //   console.error('获取车辆信息失败:', error);
-      //   this.$message.error('获取车辆信息失败');
-      // }).finally(() => {
-      //   this.loading = false;
-      // });
-
-      // 模拟获取车辆详情数据
-      setTimeout(() => {
-        this.currentVehicleData = {
-          // 车辆信息
-          licensePlate: '宝马MW6462C5',
-          frameNo: 'LBV31FX05RM896107',
-          engineNo: 'A008F231',
-          carModel: '宝马MW6462C5多用途乘用车',
-          registrationDate: '2024-09-03',
-          approvedMass: '3999',
-          seatingCapacity: '5',
-          usageNature: '01',
-          vehicleType: '01',
-          energyType: '01',
-          displacement: '2.99',
-          power: '',
-
-          // 商业险信息
-          policyNo: 'PDAA202544010000522184',
-          insuranceCompany: '1',
-          insuranceStartDate: '2024-09-03 00:00:00',
-          insuranceEndDate: '2024-09-03 00:00:00',
-          vehicleDamageAmount: '177155.20',
-          thirdPartyAmount: '3000000.00',
-          totalPremium: '5248.67',
-          feeConfirmTime: '2024-09-03 00:00:00',
-          policyCreateTime: '2024-09-03 00:00:00',
-          insuranceConfirmTime: '2024-09-03 00:00:00',
-          insuranceConfirmCode: '',
-
-          // 投保险种
-          insuranceTypes: [
-            {
-              name: '0301100',
-              type: '0301100',
-              amount: '150,000',
-              premium: '150,000'
-            },
-            {
-              name: '0301600',
-              type: '0301600',
-              amount: '150,000',
-              premium: '150,000'
-            },
-            {
-              name: '0301700',
-              type: '0301700',
-              amount: '150,000',
-              premium: '150,000'
-            },
-            {
-              name: '0301800',
-              type: '0301800',
-              amount: '150,000',
-              premium: '150,000'
-            }
-          ],
-
-          // 特别约定
-          specialTerms: '',
-
-          // 购车发票
-          invoiceNo: '222555464',
-          invoiceDate: '2024-09-03',
-          totalAmount: '',
-          sellerName: '',
-          brandModel: '宝马牌系列车',
-
-          // 文件URL
-          policyFileUrl: '',
-          invoiceFileUrl: '',
-
-          // 其他
-          remark: '',
-          activeUrl: ''
-        };
-
-        this.vehicleDetailVisible = true;
+      this.$https('/subsidyPolicy/getVehicleInfo', {
+        body: { vehicleId },
+      }).then(response => {
+        if (response && response.body) {
+          const data = response.body;
+          // 直接传递API返回的数据，VehicleDetailDialog 会处理数据映射
+          this.currentVehicleData = data;
+          this.vehicleDetailVisible = true;
+        } else {
+          this.$message.error('获取车辆信息失败');
+        }
+      }).catch(error => {
+        console.error('获取车辆信息失败:', error);
+        this.$message.error('获取车辆信息失败');
+      }).finally(() => {
         this.loading = false;
-      }, 1000);
+      });
     },
 
     // 处理上传

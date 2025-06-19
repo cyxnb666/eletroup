@@ -225,7 +225,7 @@
                     <div v-for="(item, index) in formData.insuranceTypes" :key="index" class="table-row">
                         <div class="row-item">
                             <el-select v-model="item.name" placeholder="请选择" disabled>
-                                <el-option v-for="cvrgItem in dictionaryData.cvrgList" :key="cvrgItem.dicCode"
+                                <el-option v-for="cvrgItem in availableCvrgList(index)" :key="cvrgItem.dicCode"
                                     :label="cvrgItem.dicName" :value="cvrgItem.dicCode">
                                 </el-option>
                             </el-select>
@@ -307,7 +307,7 @@
 </template>
 
 <script>
-import { insuranceTypeName } from '@/views/modules/car-insurance/utils/index.js';
+import { isMainInsurance, insuranceTypeName } from '@/views/modules/car-insurance/utils/index.js';
 
 export default {
     props: {
@@ -330,6 +330,7 @@ export default {
                 carKindDicList: [],
                 carFuelTypeList: [],
                 cvrgList: [],
+                newEnergyCvrgList: [],
             })
         }
     },
@@ -423,8 +424,17 @@ export default {
 
             // 使用传入的车辆数据
             if (Object.keys(this.vehicleData || {}).length > 0) {
-                // 深拷贝车辆数据，避免直接修改props
-                this.formData = JSON.parse(JSON.stringify(this.vehicleData));
+                // 如果数据格式是新的API格式（包含vehicleInfo, policyInfo等），先进行映射
+                if (this.vehicleData.vehicleInfo || this.vehicleData.policyInfo) {
+                    this.formData = this.mapVehicleData(this.vehicleData);
+                } else {
+                    // 如果是旧格式的平铺数据，直接深拷贝
+                    this.formData = JSON.parse(JSON.stringify(this.vehicleData));
+                }
+
+                if (!this.formData.activeUrl && this.vehicleData.activeUrl) {
+                    this.formData.activeUrl = this.vehicleData.activeUrl;
+                }
 
                 if (this.formData.licensePlate === "新车未上牌") {
                     this.isNewCarWithoutPlate = true;
@@ -493,6 +503,21 @@ export default {
         },
         getInsuranceTypeName(code) {
             return insuranceTypeName(code);
+        },
+        isMainInsurance(code) {
+            return isMainInsurance(code);
+        },
+        // 获取当前可用的险种列表
+        availableCvrgList(currentIndex) {
+            // 结合新能源和普通险种列表
+            let combinedList = [...this.dictionaryData.cvrgList];
+
+            // 如果车辆是新能源汽车，也加入新能源险种
+            if (this.formData.energyType === '02') {
+                combinedList = [...combinedList, ...this.dictionaryData.newEnergyCvrgList];
+            }
+
+            return combinedList;
         },
         viewElectronicForm(type) {
             if (type === 'policy') {
