@@ -5,6 +5,11 @@
             <el-table :data="errorData" border stripe height="410px" element-loading-text="拼命加载中"
                 :header-cell-style="{ background: '#EFEFF0', color: '#252628' }" v-loading="loading">
                 <el-table-column prop="fileName" label="文件名称" align="center"></el-table-column>
+                <el-table-column v-if="showFileType" label="文件类型" align="center">
+                    <template slot-scope="scope">
+                        {{ getFileTypeText(scope.row.fileType) }}
+                    </template>
+                </el-table-column>
                 <el-table-column label="文件大小" align="center">
                     <template slot-scope="scope">
                         {{ formatFileSize(scope.row.fileSize) }}
@@ -29,6 +34,10 @@ export default {
         batchNo: {
             type: String,
             default: ''
+        },
+        showFileType: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -61,7 +70,13 @@ export default {
             if (!this.batchNo) return;
 
             this.loading = true;
-            this.$https('/activityPolicy/getFileBatchErrorHistorysByBatchNo', {
+            
+            // 根据是否显示文件类型来决定调用哪个API
+            const apiUrl = this.showFileType 
+                ? '/subsidyPolicy/getFileBatchErrorHistorysByBatchNo' 
+                : '/activityPolicy/getFileBatchErrorHistorysByBatchNo';
+            
+            this.$https(apiUrl, {
                 body: {
                     batchNo: this.batchNo
                 }
@@ -78,6 +93,15 @@ export default {
             }).finally(() => {
                 this.loading = false;
             });
+        },
+        getFileTypeText(fileType) {
+            const fileTypeMap = {
+                'policy': '商业险保单',
+                'invoice': '购车发票',
+                '1': '商业险保单',
+                '2': '购车发票'
+            };
+            return fileTypeMap[fileType] || fileType || '-';
         }
     }
 }
