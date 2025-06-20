@@ -11,7 +11,8 @@
             <el-option v-for="item in activityList" :key="item.activeId" :label="item.activeName"
               :value="item.activeId"> </el-option>
           </el-select>
-          <el-button type="primary" icon="el-icon-upload" @click="showUploadDialog" :disabled="!activityName">
+          <el-button type="primary" icon="el-icon-upload" @click="showUploadDialog" :disabled="isUploadDisabled"
+            v-if="isDealerPermission">
             上传资料(PDF)
           </el-button>
         </div>
@@ -167,6 +168,7 @@ export default {
       checkedAll: false,
       activityName: '',
       activityList: [], // 存储活动列表
+      isActivityExpired: false, // 活动是否过期
       currentActivity: null, // 当前选中的活动详情
       showAllConditions: false,
       uploadDialogVisible: false,
@@ -212,6 +214,19 @@ export default {
       // 展开查询条件时的高度
       return 'calc(100vh - 510px)'
     },
+    isDealerPermission() {
+      const permissions = JSON.parse(sessionStorage.getItem('permissions') || '[]');
+      // 如果没有厂商、大区、保险公司、集团权限，则认为是经销商权限
+      return !permissions.some(permission => [
+        'daibu-report-overview-changshang', // 厂商
+        'daibu-report-overview-dq',         // 大区
+        'daibu-report-overview-ins',        // 保险公司
+        'daibu-report-overview-jt'          // 集团
+      ].includes(permission));
+    },
+    isUploadDisabled() {
+      return this.isActivityExpired || !this.activityList.length;
+    },
   },
   created() {
     this.getActivityList();
@@ -252,19 +267,22 @@ export default {
             const firstActivity = this.activityList[0];
             this.activityName = firstActivity.activeId;
             this.currentActivity = firstActivity;
+            this.isActivityExpired = firstActivity.overdueStatus === '1';
             this.fetchSubsidyList();
+          } else if (this.activityList.length === 0) {
+            this.activityName = '';
+            this.currentActivity = null;
+            this.isActivityExpired = false;
+            this.tableData = [];
+            this.total = 0;
           }
+        } else {
+          this.activityList = [];
         }
       }).catch(error => {
         console.error('获取活动列表失败:', error);
         this.activityList = [];
       });
-      
-      if (this.activityList.length > 0) {
-        this.activityName = this.activityList[0].activeId;
-        this.currentActivity = this.activityList[0];
-        this.fetchSubsidyList();
-      }
     },
 
     // 获取保险公司列表 - 使用真实接口
@@ -300,13 +318,13 @@ export default {
       const selectedActivity = this.activityList.find(item => item.activeId === value);
       if (selectedActivity) {
         this.currentActivity = selectedActivity;
+        // 检查活动是否过期
+        this.isActivityExpired = selectedActivity.overdueStatus === '1';
+
         this.reset();
         this.currentPage = 1;
-
-        // 清空选择状态
         this.multipleSelection = [];
         this.checkedAll = false;
-
         this.fetchSubsidyList();
       }
     },
@@ -348,7 +366,7 @@ export default {
           if (response.body) {
             this.tableData = response.body.rows || [];
             this.total = response.body.total || 0;
-            
+
             this.tableData.forEach(row => {
               this.$set(row, 'isSelected', false);
             });
@@ -481,28 +499,95 @@ export default {
       this.fetchVehicleDetails(vehicleId);
     },
 
-    // 获取车辆详情数据
-    fetchVehicleDetails(vehicleId) {
-      this.loading = true;
+    // 映射险种数据
+    mapInsuranceTypes(cvrgList) {
+      if (!cvrgList || !cvrgList.length) return []
 
-      this.$https('/subsidyPolicy/getVehicleInfo', {
-        body: { vehicleId },
-      }).then(response => {
-        if (response && response.body) {
-          const data = response.body;
-          // 直接传递API返回的数据，VehicleDetailDialog 会处理数据映射
-          this.currentVehicleData = data;
-          this.vehicleDetailVisible = true;
-        } else {
-          this.$message.error('获取车辆信息失败');
+      return cvrgList.map(item => {
+        return {
+          name: item.code || '', // 使用险种代码作为name
+          type: item.code || '', // 使用险种代码作为type
+          amount: item.amount || '',
+          premium: item.cvrgPrem || '',
         }
-      }).catch(error => {
-        console.error('获取车辆信息失败:', error);
-        this.$message.error('获取车辆信息失败');
-      }).finally(() => {
-        this.loading = false;
-      });
+      })
     },
+
+    // 获取车辆详情数据
+fetchVehicleDetails(vehicleId) {
+  this.loading = true;
+
+  this.$https('/subsidyPolicy/getVehicleInfo', {
+    body: { vehicleId },
+  }).then(response => {
+    if (response && response.body) {
+      const data = response.body;
+      const vehicleData = data.vehicleData || {};
+      const cvrgList = data.cvrgList || [];
+
+      this.currentVehicleData = {
+        // 标识字段 - 控制显示逻辑
+        hasPolicyData: vehicleData.hasPolicyData || false,
+        hasInvoiceData: vehicleData.hasInvoiceData || false,
+
+        // 车辆信息 - 直接从 vehicleData 获取
+        licensePlate: vehicleData.plateNo || '',
+        frameNo: vehicleData.frmNo || '',
+        engineNo: vehicleData.engNo || '',
+        carModel: vehicleData.vehicleName || vehicleData.modelName || '',
+        registrationDate: vehicleData.fstRegNo || '',
+        approvedMass: vehicleData.ton || '',
+        seatingCapacity: vehicleData.seatNum || '',
+        usageNature: vehicleData.vhlUsageCode || '',
+        vehicleType: vehicleData.carKindCode || '',
+        energyType: vehicleData.carFuelType || '',
+        displacement: vehicleData.desplacement || '',
+        power: vehicleData.vhlPower || '',
+
+        // 商业险信息 - 直接从 vehicleData 获取
+        policyNo: vehicleData.policyNo || '',
+        insuranceCompany: vehicleData.insId || '',
+        insuranceStartDate: vehicleData.comenceTime || '',
+        insuranceEndDate: vehicleData.terminateTime || '',
+        vehicleDamageAmount: vehicleData.vehicleDamageCoverage !== undefined && vehicleData.vehicleDamageCoverage !== null ? vehicleData.vehicleDamageCoverage.toString() : '',
+        thirdPartyAmount: vehicleData.thirdPartyCoverage ? vehicleData.thirdPartyCoverage.toString() : '',
+        totalPremium: vehicleData.premiumTotal !== undefined && vehicleData.premiumTotal !== null ? vehicleData.premiumTotal.toString() : '',
+        feeConfirmTime: vehicleData.chargeConfirmTime || '',
+        policyCreateTime: vehicleData.policyGenTime || '',
+        insuranceConfirmTime: vehicleData.policyConfirmTime || '',
+        insuranceConfirmCode: vehicleData.policyConfirmCode || '',
+
+        // 投保险种 - 映射逻辑
+        insuranceTypes: this.mapInsuranceTypes(cvrgList),
+
+        // 特别约定 - 直接从 vehicleData 获取
+        specialTerms: vehicleData.specialAgreement || '',
+
+        // 购车发票 - 直接从 vehicleData 获取
+        invoiceNo: vehicleData.invoiceNo || '',
+        invoiceDate: vehicleData.invoiceDate || '',
+        totalAmount: vehicleData.totalAmount || '',
+        sellerName: vehicleData.sellerName || '',
+        brandModel: vehicleData.brandModel || '',
+
+        // 其他字段 - 直接从 vehicleData 获取
+        remark: vehicleData.remark || '',
+        policyFileUrl: vehicleData.policyFileUrl || '',
+        invoiceFileUrl: vehicleData.invoiceFileUrl || '',
+        activeUrl: vehicleData.activeUrl || ''
+      };
+
+      this.vehicleDetailVisible = true;
+    } else {
+      this.$message.error('获取车辆信息失败');
+    }
+  }).catch(error => {
+    console.error('获取车辆信息失败:', error);
+    this.$message.error('获取车辆信息失败');
+  }).finally(() => {
+    this.loading = false;
+  });
+},
 
     // 处理上传
     handleUpload(fileList) {

@@ -122,181 +122,205 @@
 
                 <!-- 商业险信息 section -->
                 <div class="section-header">商业险信息</div>
-                <el-row :gutter="20">
-                    <el-col :span="6">
-                        <el-form-item label="保单号">
-                            <el-input v-model="formData.policyNo" maxlength="50" placeholder="请输入"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="保险公司名称">
-                            <el-select v-model="formData.insuranceCompany" filterable placeholder="请选择">
-                                <el-option v-for="item in insuranceCompanies" :key="item.value" :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="保险起期">
-                            <el-date-picker v-model="formData.insuranceStartDate" type="datetime" placeholder="选择日期时间"
-                                format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss">
-                            </el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="保险止期">
-                            <el-date-picker v-model="formData.insuranceEndDate" type="datetime" placeholder="选择日期时间"
-                                format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss">
-                            </el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
 
-                <el-row :gutter="20">
-                    <el-col :span="6">
-                        <el-form-item label="车损险保额(元)">
-                            <el-input v-model="formData.vehicleDamageAmount" placeholder="请输入">
-                            </el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="三者险保额(元)">
-                            <el-input v-model="formData.thirdPartyAmount" placeholder="请输入" maxlength="20">
-                            </el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="保费合计(元)">
-                            <el-input v-model="formData.totalPremium" placeholder="请输入">
-                            </el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="收费确认时间">
-                            <el-date-picker v-model="formData.feeConfirmTime" type="datetime" placeholder="选择日期时间"
-                                format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-
-                <el-row :gutter="20">
-                    <el-col :span="6">
-                        <el-form-item label="保单生成时间">
-                            <el-date-picker v-model="formData.policyCreateTime" type="datetime" placeholder="选择日期时间"
-                                format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="投保确认时间">
-                            <el-date-picker v-model="formData.insuranceConfirmTime" type="datetime" placeholder="选择日期时间"
-                                format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="投保确认码">
-                            <el-input v-model="formData.insuranceConfirmCode" maxlength="50"
-                                placeholder="请输入"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <!-- 占位 -->
-                    </el-col>
-                </el-row>
-
-                <el-divider></el-divider>
-
-                <!-- 投保险种 section -->
-                <div class="insurance-types-header">
-                    <div class="section-header">投保险种</div>
+                <!-- 红色提示文字 - 当没有商业险数据时显示 -->
+                <div v-if="!shouldShowPolicyFields" class="missing-data-tip">
+                    * 尚未上传商业险保单
                 </div>
 
-                <div class="custom-insurance-table">
-                    <!-- 表头 -->
-                    <div class="table-header">
-                        <div class="header-item">险种名称</div>
-                        <div class="header-item">类型</div>
-                        <div class="header-item">保额</div>
-                        <div class="header-item">保费(元)</div>
-                        <div class="header-item">操作</div>
+                <!-- 商业险字段 - 当有商业险数据时显示 -->
+                <template v-if="shouldShowPolicyFields">
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="保单号">
+                                <el-input v-model="formData.policyNo" maxlength="50" placeholder="请输入"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="保险公司名称">
+                                <el-select v-model="formData.insuranceCompany" filterable placeholder="请选择">
+                                    <el-option v-for="item in insuranceCompanies" :key="item.value" :label="item.label"
+                                        :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="保险起期">
+                                <el-date-picker v-model="formData.insuranceStartDate" type="datetime" placeholder="选择日期时间"
+                                    format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss">
+                                </el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="保险止期">
+                                <el-date-picker v-model="formData.insuranceEndDate" type="datetime" placeholder="选择日期时间"
+                                    format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss">
+                                </el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="车损险保额(元)">
+                                <el-input v-model="formData.vehicleDamageAmount" placeholder="请输入">
+                                </el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="三者险保额(元)">
+                                <el-input v-model="formData.thirdPartyAmount" placeholder="请输入" maxlength="20">
+                                </el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="保费合计(元)">
+                                <el-input v-model="formData.totalPremium" placeholder="请输入">
+                                </el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="收费确认时间">
+                                <el-date-picker v-model="formData.feeConfirmTime" type="datetime" placeholder="选择日期时间"
+                                    format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="保单生成时间">
+                                <el-date-picker v-model="formData.policyCreateTime" type="datetime" placeholder="选择日期时间"
+                                    format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="投保确认时间">
+                                <el-date-picker v-model="formData.insuranceConfirmTime" type="datetime" placeholder="选择日期时间"
+                                    format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="投保确认码">
+                                <el-input v-model="formData.insuranceConfirmCode" maxlength="50"
+                                    placeholder="请输入"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <!-- 占位 -->
+                        </el-col>
+                    </el-row>
+                </template>
+
+                <!-- 只有在有商业险数据时才显示投保险种部分 -->
+                <template v-if="shouldShowPolicyFields">
+                    <el-divider></el-divider>
+
+                    <!-- 投保险种 section -->
+                    <div class="insurance-types-header">
+                        <div class="section-header">投保险种</div>
                     </div>
 
-                    <!-- 表格内容 -->
-                    <div v-for="(item, index) in formData.insuranceTypes" :key="index" class="table-row">
-                        <div class="row-item">
-                            <el-select v-model="item.name" placeholder="请选择" disabled>
-                                <el-option v-for="cvrgItem in availableCvrgList(index)" :key="cvrgItem.dicCode"
-                                    :label="cvrgItem.dicName" :value="cvrgItem.dicCode">
-                                </el-option>
-                            </el-select>
+                    <div class="custom-insurance-table">
+                        <!-- 表头 -->
+                        <div class="table-header">
+                            <div class="header-item">险种名称</div>
+                            <div class="header-item">类型</div>
+                            <div class="header-item">保额</div>
+                            <div class="header-item">保费(元)</div>
+                            <div class="header-item">操作</div>
                         </div>
-                        <div class="row-item">{{ item.name ? getInsuranceTypeName(item.name) : '' }}</div>
-                        <div class="row-item">
-                            <el-input v-model="item.amount" placeholder="请输入保额" disabled maxlength="20">
-                            </el-input>
+
+                        <!-- 表格内容 -->
+                        <div v-for="(item, index) in formData.insuranceTypes" :key="index" class="table-row">
+                            <div class="row-item">
+                                <el-select v-model="item.name" placeholder="请选择" disabled>
+                                    <el-option v-for="cvrgItem in availableCvrgList(index)" :key="cvrgItem.dicCode"
+                                        :label="cvrgItem.dicName" :value="cvrgItem.dicCode">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="row-item">{{ item.name ? getInsuranceTypeName(item.name) : '' }}</div>
+                            <div class="row-item">
+                                <el-input v-model="item.amount" placeholder="请输入保额" disabled maxlength="20">
+                                </el-input>
+                            </div>
+                            <div class="row-item">
+                                <el-input v-model="item.premium" placeholder="请输入保费" disabled>
+                                </el-input>
+                            </div>
+                            <div class="row-item">
+                                <span class="delete-btn-disabled">删除</span>
+                            </div>
                         </div>
-                        <div class="row-item">
-                            <el-input v-model="item.premium" placeholder="请输入保费" disabled>
-                            </el-input>
-                        </div>
-                        <div class="row-item">
-                            <span class="delete-btn-disabled">删除</span>
+
+                        <!-- 没有数据时的提示 -->
+                        <div v-if="formData.insuranceTypes.length === 0" class="no-data">
+                            暂无险种数据
                         </div>
                     </div>
+                </template>
 
-                    <!-- 没有数据时的提示 -->
-                    <div v-if="formData.insuranceTypes.length === 0" class="no-data">
-                        暂无险种数据
-                    </div>
-                </div>
+                <!-- 只有在有商业险数据时才显示特别约定部分 -->
+                <template v-if="shouldShowPolicyFields">
+                    <el-divider></el-divider>
 
-                <el-divider></el-divider>
-
-                <!-- 特别约定 section -->
-                <div class="section-header">特别约定</div>
-                <el-form-item>
-                    <el-input type="textarea" v-model="formData.specialTerms" :rows="4" maxlength="500"
-                        placeholder="请输入特别约定内容"></el-input>
-                </el-form-item>
+                    <!-- 特别约定 section -->
+                    <div class="section-header">特别约定</div>
+                    <el-form-item>
+                        <el-input type="textarea" v-model="formData.specialTerms" :rows="4" maxlength="500"
+                            placeholder="请输入特别约定内容"></el-input>
+                    </el-form-item>
+                </template>
 
                 <el-divider></el-divider>
 
                 <!-- 购车发票 section -->
                 <div class="section-header">购车发票</div>
-                <el-row :gutter="20">
-                    <el-col :span="6">
-                        <el-form-item label="发票号">
-                            <el-input v-model="formData.invoiceNo" maxlength="50" placeholder="请输入"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="开票日期">
-                            <el-date-picker v-model="formData.invoiceDate" type="date" placeholder="选择日期"
-                                format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="加税合计(元)">
-                            <el-input v-model="formData.totalAmount" placeholder="输入内容"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="销售单位名称">
-                            <el-input v-model="formData.sellerName" placeholder="输入内容"></el-input>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
 
-                <el-row :gutter="20">
-                    <el-col :span="6">
-                        <el-form-item label="厂牌型号">
-                            <el-input v-model="formData.brandModel" placeholder="请输入"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="18">
-                        <!-- 占位 -->
-                    </el-col>
-                </el-row>
+                <!-- 红色提示文字 - 当没有购车发票数据时显示 -->
+                <div v-if="!shouldShowInvoiceFields" class="missing-data-tip">
+                    * 尚未上传购车发票
+                </div>
+
+                <!-- 购车发票字段 - 当有购车发票数据时显示 -->
+                <template v-if="shouldShowInvoiceFields">
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="发票号">
+                                <el-input v-model="formData.invoiceNo" maxlength="50" placeholder="请输入"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="开票日期">
+                                <el-date-picker v-model="formData.invoiceDate" type="date" placeholder="选择日期"
+                                    format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="加税合计(元)">
+                                <el-input v-model="formData.totalAmount" placeholder="输入内容"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="销售单位名称">
+                                <el-input v-model="formData.sellerName" placeholder="输入内容"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="厂牌型号">
+                                <el-input v-model="formData.brandModel" placeholder="请输入"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="18">
+                            <!-- 占位 -->
+                        </el-col>
+                    </el-row>
+                </template>
             </el-form>
         </div>
 
@@ -385,7 +409,11 @@ export default {
                 remark: '',
                 policyFileUrl: '',
                 invoiceFileUrl: '',
-                activeUrl: ''
+                activeUrl: '',
+
+                // 标识字段
+                hasPolicyData: true,
+                hasInvoiceData: true
             }
         };
     },
@@ -403,6 +431,16 @@ export default {
             }
 
             return this.formData.remark;
+        },
+
+        // 是否显示商业险字段
+        shouldShowPolicyFields() {
+            return this.formData.hasPolicyData !== false;
+        },
+
+        // 是否显示购车发票字段  
+        shouldShowInvoiceFields() {
+            return this.formData.hasInvoiceData !== false;
         }
     },
     watch: {
@@ -424,13 +462,8 @@ export default {
 
             // 使用传入的车辆数据
             if (Object.keys(this.vehicleData || {}).length > 0) {
-                // 如果数据格式是新的API格式（包含vehicleInfo, policyInfo等），先进行映射
-                if (this.vehicleData.vehicleInfo || this.vehicleData.policyInfo) {
-                    this.formData = this.mapVehicleData(this.vehicleData);
-                } else {
-                    // 如果是旧格式的平铺数据，直接深拷贝
-                    this.formData = JSON.parse(JSON.stringify(this.vehicleData));
-                }
+                // 深拷贝车辆数据，避免直接修改props（与 InsurancePolicyDialog 保持一致）
+                this.formData = JSON.parse(JSON.stringify(this.vehicleData));
 
                 if (!this.formData.activeUrl && this.vehicleData.activeUrl) {
                     this.formData.activeUrl = this.vehicleData.activeUrl;
@@ -494,7 +527,11 @@ export default {
                 invoiceDate: '',
                 totalAmount: '',
                 sellerName: '',
-                brandModel: ''
+                brandModel: '',
+
+                // 标识字段
+                hasPolicyData: true,
+                hasInvoiceData: true
             };
         },
         handleClose() {
@@ -680,6 +717,17 @@ export default {
     padding: 20px;
     text-align: center;
     color: #909399;
+}
+
+/* 红色提示文字样式 */
+.missing-data-tip {
+    color: #F56C6C;
+    font-size: 14px;
+    margin: 10px 0 20px 0;
+    padding: 8px 12px;
+    background-color: #FEF0F0;
+    border: 1px solid #FCDCDC;
+    border-radius: 4px;
 }
 
 /deep/ .el-date-editor.el-input,
