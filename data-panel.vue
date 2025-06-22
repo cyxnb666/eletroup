@@ -92,6 +92,8 @@
             :disabled="multipleSelection.length === 0">导出明细</el-button>
           <el-button plain icon="el-icon-setting" @click="openActivityManagement" :disabled="!activityName"
             v-if="hasFactoryPermission">活动管理</el-button>
+          <el-button plain icon="el-icon-setting" @click="openArcManagement" 
+            :disabled="multipleSelection.length !== 1">ARC管理</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -134,18 +136,26 @@
     <activity-management :visible.sync="activityManagementVisible"
       :activity-name="currentActivity ? currentActivity.activeName : ''" :active-id="activityName"
       :current-activity="currentActivity" />
+    <arc-management-dialog :visible.sync="arcManagementVisible"
+  :activity-name="currentActivity ? currentActivity.activeName : ''" 
+  :active-id="activityName"
+  :dept-code="multipleSelection.length > 0 ? multipleSelection[0].deptCode : ''"
+  :current-activity="currentActivity" />
   </div>
 </template>
 
 <script>
 import { getReportDropdownList } from '@/views/modules/daibu-insurance/daibuche-common.js';
 import ActivityManagement from './components/activity-management.vue';
+import ArcManagementDialog from './components/arc-management-dialog.vue';
 export default {
   components: {
-    ActivityManagement
+    ActivityManagement,
+    ArcManagementDialog
   },
   data() {
     return {
+      arcManagementVisible: false,
       checkedAll: false,
       activityList: [], // 存储活动列表
       dealerList: [], //存储经销商列表
@@ -554,6 +564,13 @@ export default {
     openActivityManagement() {
       if (this.activityName) {
         this.activityManagementVisible = true;
+      }
+    },
+    openArcManagement() {
+      if (this.multipleSelection.length === 1) {
+        this.arcManagementVisible = true;
+      } else {
+        this.$message.warning('请先选择一条记录');
       }
     }
   }
