@@ -37,7 +37,8 @@
           <div v-else class="uploaded-button-with-title">
             <div class="button-title">终审合格</div>
             <div class="file-info">
-              <span class="file-name clickable" @click="downloadFile(arcData.finalAuditFile.downloadUrl)">{{ arcData.finalAuditFile.fileName }}</span>
+              <span class="file-name clickable" @click="downloadFile(arcData.finalAuditFile.downloadUrl)">{{
+                arcData.finalAuditFile.fileName }}</span>
             </div>
             <i class="el-icon-upload2 upload-icon reupload-right" @click="handleArcFinalAudit"></i>
           </div>
@@ -69,7 +70,8 @@
           <div v-else class="uploaded-button-with-title">
             <div class="button-title-row">
               <span class="button-title">新增凭证</span>
-              <i v-if="!arcPremiumData.uploadingNew" class="el-icon-upload2 upload-icon active" @click="handleNewCertificate"></i>
+              <i v-if="!arcPremiumData.uploadingNew" class="el-icon-upload2 upload-icon active"
+                @click="handleNewCertificate"></i>
               <i v-else class="el-icon-loading upload-icon active"></i>
             </div>
             <div class="certificate-data-row">
@@ -88,7 +90,8 @@
             <span class="button-text">凭证退保</span>
             <i class="el-icon-upload2 upload-icon disabled"></i>
           </div>
-          <div v-else-if="!arcPremiumData.surrenderUploadTime" class="active-button" @click="handleCertificateSurrender">
+          <div v-else-if="!arcPremiumData.surrenderUploadTime" class="active-button"
+            @click="handleCertificateSurrender">
             <span class="button-text">凭证退保</span>
             <i v-if="!arcPremiumData.uploadingSurrender" class="el-icon-upload2 upload-icon active"></i>
             <i v-else class="el-icon-loading upload-icon active"></i>
@@ -97,7 +100,8 @@
             <div class="button-title-row">
               <span class="button-title">凭证退保</span>
               <div class="surrender-upload-container">
-                <i v-if="!arcPremiumData.uploadingSurrender" class="el-icon-upload2 upload-icon active" @click="handleCertificateSurrender"></i>
+                <i v-if="!arcPremiumData.uploadingSurrender" class="el-icon-upload2 upload-icon active"
+                  @click="handleCertificateSurrender"></i>
                 <i v-else class="el-icon-loading upload-icon active"></i>
               </div>
             </div>
@@ -113,7 +117,8 @@
             <span class="button-text">终审合格</span>
             <i class="el-icon-upload2 upload-icon disabled"></i>
           </div>
-          <div v-else-if="arcPremiumData.finalAuditStatus === 'none'" class="active-button" @click="handlePremiumFinalAudit">
+          <div v-else-if="arcPremiumData.finalAuditStatus === 'none'" class="active-button"
+            @click="handlePremiumFinalAudit">
             <span class="button-text">终审合格</span>
             <i v-if="!arcPremiumData.uploadingFinal" class="el-icon-upload2 upload-icon active"></i>
             <i v-else class="el-icon-loading upload-icon active"></i>
@@ -121,7 +126,8 @@
           <div v-else class="uploaded-button-with-title">
             <div class="button-title">终审合格</div>
             <div class="file-info">
-              <span class="file-name clickable" @click="downloadFile(arcPremiumData.finalAuditFile.downloadUrl)">{{ arcPremiumData.finalAuditFile.fileName }}</span>
+              <span class="file-name clickable" @click="downloadFile(arcPremiumData.finalAuditFile.downloadUrl)">{{
+                arcPremiumData.finalAuditFile.fileName }}</span>
             </div>
             <i class="el-icon-upload2 upload-icon reupload-right" @click="handlePremiumFinalAudit"></i>
           </div>
@@ -180,7 +186,7 @@ export default {
       dialogVisible: false,
       loading: false,
       currentUploadType: '', // 'arc_final' | 'premium_new' | 'premium_surrender' | 'premium_final'
-      
+
       // 模拟数据 - 设置对比状态
       arcData: {
         hasArcRelation: true,        // ARC有关联凭证
@@ -188,7 +194,7 @@ export default {
         uploading: false,
         finalAuditFile: null         // 确保没有文件
       },
-      
+
       arcPremiumData: {
         hasArcPremiumRelation: false, // ARC Premium无关联凭证 -> 终审合格应该显示灰色按钮
         certificateCount: 0,
@@ -257,72 +263,30 @@ export default {
       this.$emit('update:visible', false);
     },
 
-    // 模拟获取ARC数据
     fetchArcData() {
       this.loading = true;
-      
-      // 模拟API调用
+
       setTimeout(() => {
-        // 根据deptCode模拟不同的数据状态
-        if (this.deptCode === 'test_no_relation') {
-          // 情况1：无关联凭证状态（对应截图1）
-          this.arcData = {
-            hasArcRelation: false,
-            finalAuditStatus: 'none',
-            uploading: false,
-            finalAuditFile: null
-          };
-          this.arcPremiumData = {
-            hasArcPremiumRelation: false,
-            certificateCount: 0,
-            lastUploadTime: null,
-            surrenderUploadTime: null,
-            finalAuditStatus: 'none',
-            finalAuditFile: null,
-            uploadingNew: false,
-            uploadingSurrender: false,
-            uploadingFinal: false
-          };
-        } else if (this.deptCode === 'test_partial_relation') {
-          // 情况2：有关联但未上传文件状态
-          this.arcData = {
-            hasArcRelation: true,
-            finalAuditStatus: 'none',
-            uploading: false,
-            finalAuditFile: null
-          };
-          this.arcPremiumData = {
-            hasArcPremiumRelation: true,
-            certificateCount: 0,
-            lastUploadTime: null,
-            surrenderUploadTime: null,
-            finalAuditStatus: 'none',
-            finalAuditFile: null,
-            uploadingNew: false,
-            uploadingSurrender: false,
-            uploadingFinal: false
-          };
-        } else {
-          // 情况3：设置对比状态 - ARC有关联无文件，ARC Premium无关联
-          this.arcData = {
-            hasArcRelation: true,        // ARC有关联凭证
-            finalAuditStatus: 'none',    // 没有上传文件 -> 蓝色按钮
-            uploading: false,
-            finalAuditFile: null
-          };
-          this.arcPremiumData = {
-            hasArcPremiumRelation: false, // ARC Premium无关联凭证 -> 终审合格灰色按钮
-            certificateCount: 0,
-            lastUploadTime: null,
-            surrenderUploadTime: null,
-            finalAuditStatus: 'none',
-            finalAuditFile: null,
-            uploadingNew: false,
-            uploadingSurrender: false,
-            uploadingFinal: false
-          };
-        }
-        
+        // 复杂场景：混合多种状态
+        this.arcData = {
+          hasArcRelation: true,         // ARC有关联凭证
+          finalAuditStatus: 'none',     // 终审合格未上传
+          uploading: true,              // 正在上传终审合格文件（loading状态）
+          finalAuditFile: null
+        };
+
+        this.arcPremiumData = {
+          hasArcPremiumRelation: true,  // ARC Premium有关联凭证
+          certificateCount: 856,        // 有凭证数据
+          lastUploadTime: '2025/06/20 09:30',
+          surrenderUploadTime: null,    // 凭证退保未上传
+          finalAuditStatus: 'none',     // 终审合格未上传
+          finalAuditFile: null,
+          uploadingNew: false,          // 新增凭证不在上传中
+          uploadingSurrender: true,     // 凭证退保正在上传中（loading状态）
+          uploadingFinal: false         // 终审合格不在上传中
+        };
+
         this.loading = false;
       }, 500);
     },
@@ -334,6 +298,7 @@ export default {
 
     // ARC 终审合格
     handleArcFinalAudit() {
+      if (this.arcData.uploading) return;
       this.currentUploadType = 'arc_final';
       this.$refs.fileInput.click();
     },
@@ -350,18 +315,21 @@ export default {
 
     // ARC Premium 新增凭证
     handleNewCertificate() {
+      if (this.arcPremiumData.uploadingNew) return;
       this.currentUploadType = 'premium_new';
       this.$refs.fileInput.click();
     },
 
     // ARC Premium 凭证退保
     handleCertificateSurrender() {
+      if (this.arcPremiumData.uploadingSurrender) return;
       this.currentUploadType = 'premium_surrender';
       this.$refs.fileInput.click();
     },
 
     // ARC Premium 终审合格
     handlePremiumFinalAudit() {
+      if (this.arcPremiumData.uploadingFinal) return;
       this.currentUploadType = 'premium_final';
       this.$refs.fileInput.click();
     },
@@ -380,7 +348,7 @@ export default {
     handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
-      
+
       // 检查文件类型
       if (!file.name.match(/\.(xls|xlsx)$/i)) {
         this.$message.error('只能上传 .xls/.xlsx 格式的文件');
@@ -388,7 +356,7 @@ export default {
       }
 
       this.handleFileUpload(file);
-      
+
       // 重置input，允许选择相同文件
       event.target.value = '';
     },
@@ -410,7 +378,7 @@ export default {
           this.arcPremiumData.uploadingFinal = true;
           break;
       }
-      
+
       // 模拟上传过程
       setTimeout(() => {
         // 根据上传类型更新对应数据
@@ -444,7 +412,7 @@ export default {
             };
             break;
         }
-        
+
         this.$message.success('上传成功');
       }, 2000);
     },
@@ -551,14 +519,16 @@ h3 {
 }
 
 .disabled-button .button-text {
-  color: #00000099;  /* 确保禁用状态字体颜色为指定颜色 */
+  color: #00000099;
+  /* 确保禁用状态字体颜色为指定颜色 */
   font-size: 14px;
   font-weight: 500;
 }
 
 .disabled-button .upload-icon.disabled,
 .disabled-button .download-icon.disabled {
-  color: #00000099;  /* 确保禁用状态图标颜色为指定颜色 */
+  color: #00000099;
+  /* 确保禁用状态图标颜色为指定颜色 */
   font-size: 18px;
 }
 
@@ -659,7 +629,8 @@ h3 {
   display: flex;
   align-items: center;
   margin-top: 4px;
-  padding-right: 30px; /* 为右侧图标留出空间 */
+  padding-right: 30px;
+  /* 为右侧图标留出空间 */
 }
 
 .file-name {
@@ -707,7 +678,8 @@ h3 {
 .certificate-count {
   color: #000000E5;
   font-size: 13px;
-  font-weight: normal;  /* 去掉加粗 */
+  font-weight: normal;
+  /* 去掉加粗 */
 }
 
 .data-icon {
@@ -739,6 +711,7 @@ h3 {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
