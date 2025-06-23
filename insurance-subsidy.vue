@@ -24,13 +24,13 @@
       <el-form :model="queryForm" class="search-form" ref="queryForm" label-position="top">
         <el-row :gutter="20">
           <el-col :span="6">
-            <el-form-item label="车架号" prop="frameNo">
-              <el-input v-model="queryForm.frameNo" placeholder="请输入" maxlength="17" clearable></el-input>
+            <el-form-item label="车架号" prop="frmNo">
+              <el-input v-model="queryForm.frmNo" placeholder="请输入" maxlength="17" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="商业险保单号" prop="policyNo">
-              <el-input v-model="queryForm.policyNo" placeholder="请输入" maxlength="50" clearable></el-input>
+            <el-form-item label="商业险保单号" prop="vciPolicyNo">
+              <el-input v-model="queryForm.vciPolicyNo" placeholder="请输入" maxlength="50" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -39,8 +39,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="保险公司" prop="insCompany">
-              <el-select v-model="queryForm.insCompany" placeholder="请选择" clearable filterable style="width: 100%">
+            <el-form-item label="保险公司" prop="vciInsId">
+              <el-select v-model="queryForm.vciInsId" placeholder="请选择" clearable filterable style="width: 100%">
                 <el-option v-for="item in insCompanyList" :key="item.value" :label="item.label"
                   :value="item.value"></el-option>
               </el-select>
@@ -58,8 +58,8 @@
               </el-form-item>
             </el-col>
             <el-col :span="6">
-              <el-form-item label="车型" prop="carModel">
-                <el-input v-model="queryForm.carModel" placeholder="请输入" maxlength="50" clearable></el-input>
+              <el-form-item label="车型" prop="vehicleName">
+                <el-input v-model="queryForm.vehicleName" placeholder="请输入" maxlength="50" clearable></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -107,16 +107,16 @@
           </template>
         </el-table-column>
         <el-table-column prop="deptName" label="经销商" align="center"></el-table-column>
-        <el-table-column prop="frameNo" label="车架号" align="center"></el-table-column>
-        <el-table-column prop="insCompany" label="保险公司" align="center"></el-table-column>
-        <el-table-column prop="policyNo" label="商业险保单号" align="center" width="150"></el-table-column>
+        <el-table-column prop="frmNo" label="车架号" align="center"></el-table-column>
+        <el-table-column prop="vciInsName" label="保险公司" align="center"></el-table-column>
+        <el-table-column prop="vciPolicyNo" label="商业险保单号" align="center" width="150"></el-table-column>
         <el-table-column prop="invoiceNo" label="购车发票号" align="center"></el-table-column>
         <el-table-column prop="isElectricVehicle" label="是否纯电车" align="center">
           <template slot-scope="scope">
             {{ scope.row.isElectricVehicle === '1' ? '是' : '否' }}
           </template>
         </el-table-column>
-        <el-table-column prop="registrationDate" label="初登日期" align="center"></el-table-column>
+        <el-table-column prop="fstRegNo" label="初登日期" align="center"></el-table-column>
         <el-table-column prop="updateTime" label="更新时间" align="center"></el-table-column>
       </el-table>
     </div>
@@ -189,11 +189,11 @@ export default {
       },
       queryForm: {
         updateTime: [],
-        frameNo: '',
-        policyNo: '',
+        frmNo: '',
+        vciPolicyNo: '',
         invoiceNo: '',
-        insCompany: '',
-        carModel: '',
+        vciInsId: '',
+        vehicleName: '',
       },
       tableData: [],
       multipleSelection: [],
@@ -258,7 +258,7 @@ export default {
 
     // 获取活动列表
     getActivityList() {
-      this.$https('/subsidyActivity/getActivityList', {
+      this.$https('/ncdController/getNcdActiveTypeList', {
         body: {}
       }).then(response => {
         if (response) {
@@ -348,17 +348,17 @@ export default {
         activeId: this.activityName || '',
         updateStartTime: this.queryForm.updateTime && this.queryForm.updateTime[0] ? this.queryForm.updateTime[0] : '',
         updateEndTime: this.queryForm.updateTime && this.queryForm.updateTime[1] ? this.queryForm.updateTime[1] : '',
-        frameNo: this.queryForm.frameNo || '',
-        policyNo: this.queryForm.policyNo || '',
+        frmNo: this.queryForm.frmNo || '',
+        vciPolicyNo: this.queryForm.vciPolicyNo || '',
         invoiceNo: this.queryForm.invoiceNo || '',
-        insCompany: this.queryForm.insCompany || '',
-        carModel: this.queryForm.carModel || '',
+        vciInsId: this.queryForm.vciInsId || '',
+        vehicleName: this.queryForm.vehicleName || '',
         page: this.currentPage,
         rows: this.pageSize,
       };
 
       // TODO: 调用实际API
-      this.$https('/subsidyPolicy/getSubsidyPolicyList', {
+      this.$https('/ncdController/getNcdList', {
         body: params,
       }).then(response => {
         this.tableLoading = false;
@@ -413,11 +413,11 @@ export default {
             isAllChecked: true,
             updateStartTime: this.queryForm.updateTime && this.queryForm.updateTime[0] ? this.queryForm.updateTime[0] : '',
             updateEndTime: this.queryForm.updateTime && this.queryForm.updateTime[1] ? this.queryForm.updateTime[1] : '',
-            frameNo: this.queryForm.frameNo || '',
-            policyNo: this.queryForm.policyNo || '',
+            frmNo: this.queryForm.frmNo || '',
+            vciPolicyNo: this.queryForm.vciPolicyNo || '',
             invoiceNo: this.queryForm.invoiceNo || '',
-            insCompany: this.queryForm.insCompany || '',
-            carModel: this.queryForm.carModel || '',
+            vciInsId: this.queryForm.vciInsId || '',
+            vehicleName: this.queryForm.vehicleName || '',
           };
         } else {
           // 勾选具体行时，只传递选中行的ID
@@ -514,80 +514,80 @@ export default {
     },
 
     // 获取车辆详情数据
-fetchVehicleDetails(vehicleId) {
-  this.loading = true;
+    fetchVehicleDetails(vehicleId) {
+      this.loading = true;
 
-  this.$https('/subsidyPolicy/getVehicleInfo', {
-    body: { vehicleId },
-  }).then(response => {
-    if (response && response.body) {
-      const data = response.body;
-      const vehicleData = data.vehicleData || {};
-      const cvrgList = data.cvrgList || [];
+      this.$https('/subsidyPolicy/getVehicleInfo', {
+        body: { vehicleId },
+      }).then(response => {
+        if (response && response.body) {
+          const data = response.body;
+          const vehicleData = data.vehicleData || {};
+          const cvrgList = data.cvrgList || [];
 
-      this.currentVehicleData = {
-        // 标识字段 - 控制显示逻辑
-        hasPolicyData: vehicleData.hasPolicyData || false,
-        hasInvoiceData: vehicleData.hasInvoiceData || false,
+          this.currentVehicleData = {
+            // 标识字段 - 控制显示逻辑
+            hasPolicyData: vehicleData.hasPolicyData || false,
+            hasInvoiceData: vehicleData.hasInvoiceData || false,
 
-        // 车辆信息 - 直接从 vehicleData 获取
-        licensePlate: vehicleData.plateNo || '',
-        frameNo: vehicleData.frmNo || '',
-        engineNo: vehicleData.engNo || '',
-        carModel: vehicleData.vehicleName || vehicleData.modelName || '',
-        registrationDate: vehicleData.fstRegNo || '',
-        approvedMass: vehicleData.ton || '',
-        seatingCapacity: vehicleData.seatNum || '',
-        usageNature: vehicleData.vhlUsageCode || '',
-        vehicleType: vehicleData.carKindCode || '',
-        energyType: vehicleData.carFuelType || '',
-        displacement: vehicleData.desplacement || '',
-        power: vehicleData.vhlPower || '',
+            // 车辆信息 - 直接从 vehicleData 获取
+            licensePlate: vehicleData.plateNo || '',
+            frmNo: vehicleData.frmNo || '',
+            engineNo: vehicleData.engNo || '',
+            vehicleName: vehicleData.vehicleName || vehicleData.modelName || '',
+            registrationDate: vehicleData.fstRegNo || '',
+            approvedMass: vehicleData.ton || '',
+            seatingCapacity: vehicleData.seatNum || '',
+            usageNature: vehicleData.vhlUsageCode || '',
+            vehicleType: vehicleData.carKindCode || '',
+            energyType: vehicleData.carFuelType || '',
+            displacement: vehicleData.desplacement || '',
+            power: vehicleData.vhlPower || '',
 
-        // 商业险信息 - 直接从 vehicleData 获取
-        policyNo: vehicleData.policyNo || '',
-        insuranceCompany: vehicleData.insId || '',
-        insuranceStartDate: vehicleData.comenceTime || '',
-        insuranceEndDate: vehicleData.terminateTime || '',
-        vehicleDamageAmount: vehicleData.vehicleDamageCoverage !== undefined && vehicleData.vehicleDamageCoverage !== null ? vehicleData.vehicleDamageCoverage.toString() : '',
-        thirdPartyAmount: vehicleData.thirdPartyCoverage ? vehicleData.thirdPartyCoverage.toString() : '',
-        totalPremium: vehicleData.premiumTotal !== undefined && vehicleData.premiumTotal !== null ? vehicleData.premiumTotal.toString() : '',
-        feeConfirmTime: vehicleData.chargeConfirmTime || '',
-        policyCreateTime: vehicleData.policyGenTime || '',
-        insuranceConfirmTime: vehicleData.policyConfirmTime || '',
-        insuranceConfirmCode: vehicleData.policyConfirmCode || '',
+            // 商业险信息 - 直接从 vehicleData 获取
+            vciPolicyNo: vehicleData.vciPolicyNo || '',
+            insuranceCompany: vehicleData.insId || '',
+            insuranceStartDate: vehicleData.comenceTime || '',
+            insuranceEndDate: vehicleData.terminateTime || '',
+            vehicleDamageAmount: vehicleData.vehicleDamageCoverage !== undefined && vehicleData.vehicleDamageCoverage !== null ? vehicleData.vehicleDamageCoverage.toString() : '',
+            thirdPartyAmount: vehicleData.thirdPartyCoverage ? vehicleData.thirdPartyCoverage.toString() : '',
+            totalPremium: vehicleData.premiumTotal !== undefined && vehicleData.premiumTotal !== null ? vehicleData.premiumTotal.toString() : '',
+            feeConfirmTime: vehicleData.chargeConfirmTime || '',
+            policyCreateTime: vehicleData.policyGenTime || '',
+            insuranceConfirmTime: vehicleData.policyConfirmTime || '',
+            insuranceConfirmCode: vehicleData.policyConfirmCode || '',
 
-        // 投保险种 - 映射逻辑
-        insuranceTypes: this.mapInsuranceTypes(cvrgList),
+            // 投保险种 - 映射逻辑
+            insuranceTypes: this.mapInsuranceTypes(cvrgList),
 
-        // 特别约定 - 直接从 vehicleData 获取
-        specialTerms: vehicleData.specialAgreement || '',
+            // 特别约定 - 直接从 vehicleData 获取
+            specialTerms: vehicleData.specialAgreement || '',
 
-        // 购车发票 - 直接从 vehicleData 获取
-        invoiceNo: vehicleData.invoiceNo || '',
-        invoiceDate: vehicleData.invoiceDate || '',
-        totalAmount: vehicleData.totalAmount || '',
-        sellerName: vehicleData.sellerName || '',
-        brandModel: vehicleData.brandModel || '',
+            // 购车发票 - 直接从 vehicleData 获取
+            invoiceNo: vehicleData.invoiceNo || '',
+            invoiceDate: vehicleData.invoiceDate || '',
+            totalAmount: vehicleData.totalAmount || '',
+            sellerName: vehicleData.sellerName || '',
+            brandModel: vehicleData.brandModel || '',
 
-        // 其他字段 - 直接从 vehicleData 获取
-        remark: vehicleData.remark || '',
-        policyFileUrl: vehicleData.policyFileUrl || '',
-        invoiceFileUrl: vehicleData.invoiceFileUrl || '',
-        activeUrl: vehicleData.activeUrl || ''
-      };
+            // 其他字段 - 直接从 vehicleData 获取
+            remark: vehicleData.remark || '',
+            policyFileUrl: vehicleData.policyFileUrl || '',
+            invoiceFileUrl: vehicleData.invoiceFileUrl || '',
+            activeUrl: vehicleData.activeUrl || ''
+          };
 
-      this.vehicleDetailVisible = true;
-    } else {
-      this.$message.error('获取车辆信息失败');
-    }
-  }).catch(error => {
-    console.error('获取车辆信息失败:', error);
-    this.$message.error('获取车辆信息失败');
-  }).finally(() => {
-    this.loading = false;
-  });
-},
+          this.vehicleDetailVisible = true;
+        } else {
+          this.$message.error('获取车辆信息失败');
+        }
+      }).catch(error => {
+        console.error('获取车辆信息失败:', error);
+        this.$message.error('获取车辆信息失败');
+      }).finally(() => {
+        this.loading = false;
+      });
+    },
 
     // 处理上传
     handleUpload(fileList) {
