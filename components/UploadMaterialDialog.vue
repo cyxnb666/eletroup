@@ -56,7 +56,7 @@
                 </div>
               </div>
 
-              <!-- 进度条占位区域 - 始终存在但内容可变 -->
+              <!-- 进度条占位区域 -->
               <div class="progress-container">
                 <el-progress v-if="file.status === 'uploading' || file.status === 'uploaded'"
                   :percentage="file.percentage || 0" :stroke-width="4" class="upload-progress"
@@ -104,7 +104,7 @@ export default {
       type: String,
       default: ''
     },
-    activeId: {  // 这是活动ID
+    activeId: {  // 活动ID
       type: String,
       default: ''
     },
@@ -163,7 +163,7 @@ export default {
       this.$refs.fileInput.click()
     },
 
-    // 处理文件选择
+    // 文件选择
     handleFileSelect(event) {
       const files = event.target.files
       if (files) {
@@ -432,7 +432,7 @@ export default {
           };
         });
 
-        // 注意这里增加了文件类型参数
+        // 增加的文件类型参数
         const response = await this.$https('/ncdController/saveNcdFiles', {
           body: {
             activeId: this.activeId || '',
@@ -463,7 +463,6 @@ export default {
 <style scoped>
 .upload-material-dialog>>>.el-dialog__header {
   padding: 15px 20px 0px 20px;
-  /* border-bottom: 1px solid #e6e6e6; */
 }
 
 .upload-material-dialog>>>.el-dialog__body {
@@ -479,7 +478,6 @@ export default {
 .activity-name {
   font-size: 16px;
   color: #00000066;
-  /* margin-bottom: 10px; */
 }
 
 .file-type-section {
@@ -549,10 +547,8 @@ export default {
 
 .progress-container {
   height: 12px;
-  /* 减小高度 */
   padding: 0 10px;
   margin-top: 0;
-  /* 与文件项之间无间距 */
 }
 
 .drag-over {
@@ -679,12 +675,12 @@ export default {
   gap: 10px;
 }
 
-/deep/ .upload-material-dialog-custom {
+/* /deep/ .upload-material-dialog-custom {
   min-height: 70vh;
-}
+} */
 
 /deep/ .upload-material-dialog-custom .el-dialog__body {
-  max-height: 60vh;
+  /* max-height: 60vh; */
   overflow-y: auto;
 }
 </style>

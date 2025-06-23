@@ -71,7 +71,7 @@ export default {
 
             this.loading = true;
             
-            // 根据是否显示文件类型来决定调用哪个API
+            // 根据是否显示文件类型来决定调用哪个接口
             const apiUrl = this.showFileType 
                 ? '/ncdController/getNcdFileBatchErrorHistorysByBatchNo' 
                 : '/activityPolicy/getFileBatchErrorHistorysByBatchNo';

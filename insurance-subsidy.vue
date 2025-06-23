@@ -285,7 +285,7 @@ export default {
       });
     },
 
-    // 获取保险公司列表 - 使用真实接口
+    // 获取保险公司列表
     async getInsuranceCompanies() {
       try {
         const result = await getInsuranceCompanies()
@@ -343,7 +343,6 @@ export default {
 
       this.tableLoading = true;
 
-      // 构建查询参数
       const params = {
         activeId: this.activityName || '',
         updateStartTime: this.queryForm.updateTime && this.queryForm.updateTime[0] ? this.queryForm.updateTime[0] : '',
@@ -389,7 +388,7 @@ export default {
       });
     },
 
-    // 删除选中项
+    // 删除
     deleteItems() {
       if (this.multipleSelection.length === 0 && !this.checkedAll) {
         this.$message.warning('请至少选择一条记录');
@@ -519,59 +518,58 @@ export default {
       }).then(response => {
         if (response && response.body) {
           const data = response.body;
-          const vehicleData = data.vehicleData || {};
           const cvrgList = data.cvrgList || [];
 
           this.currentVehicleData = {
             // 标识字段 - 控制显示逻辑
-            hasPolicyData: vehicleData.hasPolicyData || false,
-            hasInvoiceData: vehicleData.hasInvoiceData || false,
+            hasPolicyData: data.policyDataStatus === '1',
+            hasInvoiceData: data.carInvoiceDataStatus === '1',
 
-            // 车辆信息 - 直接从 vehicleData 获取
-            licensePlate: vehicleData.plateNo || '',
-            frmNo: vehicleData.frmNo || '',
-            engineNo: vehicleData.engNo || '',
-            vehicleName: vehicleData.vehicleName || vehicleData.modelName || '',
-            registrationDate: vehicleData.fstRegNo || '',
-            approvedMass: vehicleData.ton || '',
-            seatingCapacity: vehicleData.seatNum || '',
-            usageNature: vehicleData.vhlUsageCode || '',
-            vehicleType: vehicleData.carKindCode || '',
-            energyType: vehicleData.carFuelType || '',
-            displacement: vehicleData.desplacement || '',
-            power: vehicleData.vhlPower || '',
+            // 车辆信息
+            licensePlate: data.plateNo || '',
+            frameNo: data.frmNo || '',
+            engineNo: data.engNo || '',
+            carModel: data.vehicleName || '',
+            registrationDate: data.fstRegNo || '',
+            approvedMass: data.ton !== undefined && data.ton !== null ? data.ton.toString() : '',
+            seatingCapacity: data.seatNum !== undefined && data.seatNum !== null ? data.seatNum.toString() : '',
+            usageNature: data.vhlUsageCode || '',
+            vehicleType: data.carKindCode || '',
+            energyType: data.carFuelType || '',
+            displacement: data.desplacement || '',
+            power: data.vhlPower !== undefined && data.vhlPower !== null ? data.vhlPower.toString() : '',
 
-            // 商业险信息 - 直接从 vehicleData 获取
-            vciPolicyNo: vehicleData.vciPolicyNo || '',
-            insuranceCompany: vehicleData.insId || '',
-            insuranceStartDate: vehicleData.comenceTime || '',
-            insuranceEndDate: vehicleData.terminateTime || '',
-            vehicleDamageAmount: vehicleData.vehicleDamageCoverage !== undefined && vehicleData.vehicleDamageCoverage !== null ? vehicleData.vehicleDamageCoverage.toString() : '',
-            thirdPartyAmount: vehicleData.thirdPartyCoverage ? vehicleData.thirdPartyCoverage.toString() : '',
-            totalPremium: vehicleData.premiumTotal !== undefined && vehicleData.premiumTotal !== null ? vehicleData.premiumTotal.toString() : '',
-            feeConfirmTime: vehicleData.chargeConfirmTime || '',
-            policyCreateTime: vehicleData.policyGenTime || '',
-            insuranceConfirmTime: vehicleData.policyConfirmTime || '',
-            insuranceConfirmCode: vehicleData.policyConfirmCode || '',
+            // 商业险信息
+            policyNo: data.vciPolicyNo || '',
+            insuranceCompany: data.vciInsId || '',
+            insuranceStartDate: data.vciComenceTime || '',
+            insuranceEndDate: data.vciTerminateTime || '',
+            vehicleDamageAmount: data.vehicleDamageCoverage || '',
+            thirdPartyAmount: data.thirdPartyCoverage || '',
+            totalPremium: data.vciPremiumTotal !== undefined && data.vciPremiumTotal !== null ? data.vciPremiumTotal.toString() : '',
+            feeConfirmTime: data.vciChargeConfirmTime || '',
+            policyCreateTime: data.vciPolicyGenTime || '',
+            insuranceConfirmTime: data.vciPolicyConfirmTime || '',
+            insuranceConfirmCode: data.vciPolicyConfirmCode || '',
 
-            // 投保险种 - 映射逻辑
+            // 投保险种
             insuranceTypes: this.mapInsuranceTypes(cvrgList),
 
-            // 特别约定 - 直接从 vehicleData 获取
-            specialTerms: vehicleData.specialAgreement || '',
+            // 特别约定
+            specialTerms: data.vciSpecialAgreement || '',
 
-            // 购车发票 - 直接从 vehicleData 获取
-            invoiceNo: vehicleData.invoiceNo || '',
-            invoiceDate: vehicleData.invoiceDate || '',
-            totalAmount: vehicleData.totalAmount || '',
-            sellerName: vehicleData.sellerName || '',
-            brandModel: vehicleData.brandModel || '',
+            // 购车发票
+            invoiceNo: data.invoiceNo || '',
+            invoiceDate: data.invoiceDate || '',
+            totalAmount: data.totalTaxAmount || '',
+            sellerName: data.sellerName || '',
+            brandModel: data.carInvoiceBrandModel || '',
 
-            // 其他字段 - 直接从 vehicleData 获取
-            remark: vehicleData.remark || '',
-            policyFileUrl: vehicleData.policyFileUrl || '',
-            invoiceFileUrl: vehicleData.invoiceFileUrl || '',
-            activeUrl: vehicleData.activeUrl || ''
+            // 其他字段
+            remark: data.remark || '',
+            policyFileUrl: data.vciFileUrl || '',
+            invoiceFileUrl: data.carInvoiceFileUrl || '',
+            activeUrl: ''
           };
 
           this.vehicleDetailVisible = true;
@@ -595,7 +593,7 @@ export default {
       });
     },
 
-    // 添加全选事件处理方法
+    // 全选处理方法
     checkedAllOnChange(val) {
       if (val) {
         // 首先清空所有行的选中状态
@@ -604,7 +602,7 @@ export default {
           this.$set(row, 'isSelected', false);
         });
 
-        // 全选时，设置所有表格行为选中状态（用于删除和导出按钮的逻辑）
+        // 全选时，设置所有表格行为选中状态（用于删除和导出按钮）
         this.multipleSelection = [...this.tableData];
       } else {
         // 取消全选时，清空选中数组

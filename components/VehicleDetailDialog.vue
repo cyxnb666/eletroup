@@ -5,10 +5,10 @@
             <div class="title-first-row">
                 <span>车辆详情</span>
                 <div class="view-buttons">
-                    <el-button type="primary" size="small" class="view-form-btn"
-                        @click="viewElectronicForm('policy')">查看商业险保单</el-button>
-                    <el-button type="primary" size="small" class="view-form-btn"
-                        @click="viewElectronicForm('invoice')">查看购车发票</el-button>
+                    <el-button plain size="small" class="view-form-btn" @click="viewElectronicForm('policy')"
+                        :disabled="!hasPolicyFile">查看商业险保单</el-button>
+                    <el-button plain size="small" class="view-form-btn" @click="viewElectronicForm('invoice')"
+                        :disabled="!hasInvoiceFile">查看购车发票</el-button>
                 </div>
             </div>
             <div class="status-notification" v-if="formData.remark">
@@ -21,9 +21,8 @@
         </div>
 
         <div v-if="dialogVisible">
-            <el-form ref="entireForm" :model="formData" label-width="100px" :disabled="true"
-                label-position="top">
-                <!-- 车辆信息 section -->
+            <el-form ref="entireForm" :model="formData" label-width="100px" :disabled="true" label-position="top">
+                <!-- 车辆信息 -->
                 <div class="section-header">车辆信息</div>
                 <el-row :gutter="20">
                     <el-col :span="6">
@@ -120,7 +119,7 @@
 
                 <el-divider></el-divider>
 
-                <!-- 商业险信息 section -->
+                <!-- 商业险信息 -->
                 <div class="section-header">商业险信息</div>
 
                 <!-- 红色提示文字 - 当没有商业险数据时显示 -->
@@ -147,8 +146,9 @@
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="保险起期">
-                                <el-date-picker v-model="formData.insuranceStartDate" type="datetime" placeholder="选择日期时间"
-                                    format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss">
+                                <el-date-picker v-model="formData.insuranceStartDate" type="datetime"
+                                    placeholder="选择日期时间" format="yyyy-MM-dd HH:mm:ss"
+                                    value-format="yyyy-MM-dd HH:mm:ss">
                                 </el-date-picker>
                             </el-form-item>
                         </el-col>
@@ -197,8 +197,9 @@
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="投保确认时间">
-                                <el-date-picker v-model="formData.insuranceConfirmTime" type="datetime" placeholder="选择日期时间"
-                                    format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+                                <el-date-picker v-model="formData.insuranceConfirmTime" type="datetime"
+                                    placeholder="选择日期时间" format="yyyy-MM-dd HH:mm:ss"
+                                    value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
@@ -217,7 +218,7 @@
                 <template v-if="shouldShowPolicyFields">
                     <el-divider></el-divider>
 
-                    <!-- 投保险种 section -->
+                    <!-- 投保险种 -->
                     <div class="insurance-types-header">
                         <div class="section-header">投保险种</div>
                     </div>
@@ -255,7 +256,7 @@
                             </div>
                         </div>
 
-                        <!-- 没有数据时的提示 -->
+                        <!-- 没有数据时提示 -->
                         <div v-if="formData.insuranceTypes.length === 0" class="no-data">
                             暂无险种数据
                         </div>
@@ -276,7 +277,7 @@
 
                 <el-divider></el-divider>
 
-                <!-- 购车发票 section -->
+                <!-- 购车发票 -->
                 <div class="section-header">购车发票</div>
 
                 <!-- 红色提示文字 - 当没有购车发票数据时显示 -->
@@ -325,7 +326,7 @@
         </div>
 
         <div slot="footer" class="dialog-footer">
-            <el-button @click="handleClose">关闭</el-button>
+            <el-button plain @click="handleClose">关闭</el-button>
         </div>
     </el-dialog>
 </template>
@@ -441,7 +442,17 @@ export default {
         // 是否显示购车发票字段  
         shouldShowInvoiceFields() {
             return this.formData.hasInvoiceData !== false;
-        }
+        },
+
+        // 判断是否有商业险保单文件
+        hasPolicyFile() {
+            return !!(this.formData.policyFileUrl && this.formData.policyFileUrl.trim());
+        },
+
+        // 判断是否有购车发票文件
+        hasInvoiceFile() {
+            return !!(this.formData.invoiceFileUrl && this.formData.invoiceFileUrl.trim());
+        },
     },
     watch: {
         visible(val) {
@@ -462,7 +473,7 @@ export default {
 
             // 使用传入的车辆数据
             if (Object.keys(this.vehicleData || {}).length > 0) {
-                // 深拷贝车辆数据，避免直接修改props（与 InsurancePolicyDialog 保持一致）
+                // 深拷贝车辆数据，避免直接修改props
                 this.formData = JSON.parse(JSON.stringify(this.vehicleData));
 
                 if (!this.formData.activeUrl && this.vehicleData.activeUrl) {
@@ -476,7 +487,6 @@ export default {
                     this.isNewCarWithoutPlate = false;
                 }
 
-                // 确保 insuranceTypes 是一个数组
                 if (!this.formData.insuranceTypes) {
                     this.formData.insuranceTypes = [];
                 }
@@ -529,7 +539,7 @@ export default {
                 sellerName: '',
                 brandModel: '',
 
-                // 标识字段
+                // 标识
                 hasPolicyData: true,
                 hasInvoiceData: true
             };
@@ -557,18 +567,10 @@ export default {
             return combinedList;
         },
         viewElectronicForm(type) {
-            if (type === 'policy') {
-                if (this.formData.policyFileUrl) {
-                    window.open(this.formData.policyFileUrl, '_blank');
-                } else {
-                    this.$message.info('没有可查看的商业险保单');
-                }
-            } else if (type === 'invoice') {
-                if (this.formData.invoiceFileUrl) {
-                    window.open(this.formData.invoiceFileUrl, '_blank');
-                } else {
-                    this.$message.info('没有可查看的购车发票');
-                }
+            if (type === 'policy' && this.formData.policyFileUrl) {
+                window.open(this.formData.policyFileUrl, '_blank');
+            } else if (type === 'invoice' && this.formData.invoiceFileUrl) {
+                window.open(this.formData.invoiceFileUrl, '_blank');
             }
         }
     }
@@ -636,7 +638,6 @@ export default {
     color: #000000E5;
 }
 
-/* 投保险种标题和按钮的容器 */
 .insurance-types-header {
     display: flex;
     justify-content: flex-start;
@@ -644,7 +645,6 @@ export default {
     margin: 15px 0 15px;
 }
 
-/* 投保险种的标题 */
 .insurance-types-header .section-header {
     margin: 0;
     padding: 0;
@@ -687,7 +687,6 @@ export default {
     border-top: none;
 }
 
-/* 表格中的选择框和输入框样式 */
 .row-item .el-select {
     width: 80%;
     margin: 0 auto;
@@ -698,7 +697,6 @@ export default {
     margin: 0 auto;
 }
 
-/* 设置内部input元素宽度 */
 .row-item /deep/ .el-input__inner,
 .row-item /deep/ .el-select .el-input__inner {
     text-align: center;
@@ -719,7 +717,6 @@ export default {
     color: #909399;
 }
 
-/* 红色提示文字样式 */
 .missing-data-tip {
     color: #F56C6C;
     font-size: 14px;
@@ -736,7 +733,6 @@ export default {
     width: 100%;
 }
 
-/* 表格中的选择框和输入框例外 */
 .row-item /deep/ .el-date-editor.el-input,
 .row-item /deep/ .el-date-editor.el-input__inner,
 .row-item /deep/ .el-select {
