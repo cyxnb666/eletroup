@@ -357,7 +357,6 @@ export default {
         rows: this.pageSize,
       };
 
-      // TODO: 调用实际API
       this.$https('/ncdController/getNcdList', {
         body: params,
       }).then(response => {
@@ -428,7 +427,6 @@ export default {
           };
         }
 
-        // TODO: 调用实际删除API
         this.$https('/subsidyPolicy/deleteSubsidyVehicles', {
           body: params
         }).then(res => {
@@ -447,7 +445,6 @@ export default {
 
     // 获取上传协议内容
     getUploadProtocol() {
-      // 使用与 activity-upload 相同的接口
       this.$https('/activityPolicy/getActivityPolicyUploadProtocol', {
         body: {}
       }).then(response => {

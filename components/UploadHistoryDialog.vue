@@ -8,7 +8,7 @@
                 <el-table-column prop="batchTotal" label="文件数量" align="center"></el-table-column>
                 <el-table-column v-if="showFileType" label="文件类型" align="center">
                     <template slot-scope="scope">
-                        {{ getFileTypeText(scope.row.fileType) }}
+                        {{ scope.row.fileTypeName }}
                     </template>
                 </el-table-column>
                 <el-table-column prop="createByName" label="上传人" align="center"></el-table-column>
@@ -99,7 +99,7 @@ export default {
             
             // 根据是否显示文件类型来决定调用哪个API
             const apiUrl = this.showFileType 
-                ? '/subsidyPolicy/getSubsidyPolicyFileBatchHistorys' 
+                ? '/ncdController/getNcdFileBatchHistorys' 
                 : '/activityPolicy/getActivityPolicyFileBatchHistorys';
             
             this.$https(apiUrl, {
@@ -134,15 +134,6 @@ export default {
                 this.$message.warning('无法获取批次信息，无法查看详情');
             }
         },
-        getFileTypeText(fileType) {
-            const fileTypeMap = {
-                'policy': '商业险保单',
-                'invoice': '购车发票',
-                '1': '商业险保单',
-                '2': '购车发票'
-            };
-            return fileTypeMap[fileType] || fileType || '-';
-        }
     }
 }
 </script>

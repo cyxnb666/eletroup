@@ -10,8 +10,8 @@
       <div class="file-type-section">
         <div class="file-type-label">文件类型</div>
         <el-select v-model="fileType" placeholder="请选择" :disabled="isUploading || uploadComplete" class="file-type-select">
-          <el-option label="商业险保单" value="policy"></el-option>
-          <el-option label="购车发票" value="invoice"></el-option>
+          <el-option label="商业险保单" value="0"></el-option>
+          <el-option label="购车发票" value="2"></el-option>
         </el-select>
       </div>
 
@@ -116,7 +116,7 @@ export default {
   data() {
     return {
       dialogVisible: this.visible,
-      fileType: 'policy', // 默认选择商业险保单
+      fileType: '0', // 默认选择商业险保单
       fileList: [],
       agreementAccepted: false,
       isDragging: false,
@@ -148,7 +148,7 @@ export default {
         this.fileList = []
         this.agreementAccepted = false
         this.uploadResults = []
-        this.fileType = 'policy' // 重置为默认文件类型
+        this.fileType = '0' // 重置为默认文件类型
       }
     },
     dialogVisible(val) {
@@ -433,10 +433,10 @@ export default {
         });
 
         // 注意这里增加了文件类型参数
-        const response = await this.$https('/subsidyPolicy/saveSubsidyPolicyFiles', {
+        const response = await this.$https('/ncdController/saveNcdFiles', {
           body: {
             activeId: this.activeId || '',
-            fileType: this.fileType, // 新增文件类型参数
+            fileType: this.fileType,
             files: files
           }
         });

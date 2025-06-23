@@ -5,11 +5,11 @@
             <el-table :data="errorData" border stripe height="410px" element-loading-text="拼命加载中"
                 :header-cell-style="{ background: '#EFEFF0', color: '#252628' }" v-loading="loading">
                 <el-table-column prop="fileName" label="文件名称" align="center"></el-table-column>
-                <el-table-column v-if="showFileType" label="文件类型" align="center">
+                <!-- <el-table-column v-if="showFileType" label="文件类型" align="center">
                     <template slot-scope="scope">
                         {{ getFileTypeText(scope.row.fileType) }}
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="文件大小" align="center">
                     <template slot-scope="scope">
                         {{ formatFileSize(scope.row.fileSize) }}
@@ -73,7 +73,7 @@ export default {
             
             // 根据是否显示文件类型来决定调用哪个API
             const apiUrl = this.showFileType 
-                ? '/subsidyPolicy/getFileBatchErrorHistorysByBatchNo' 
+                ? '/ncdController/getNcdFileBatchErrorHistorysByBatchNo' 
                 : '/activityPolicy/getFileBatchErrorHistorysByBatchNo';
             
             this.$https(apiUrl, {
