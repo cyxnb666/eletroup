@@ -422,12 +422,12 @@ export default {
           // 勾选具体行时，只传递选中行的ID
           params = {
             activeId: this.activityName || '',
-            vehicleIds: this.multipleSelection.map(item => item.id),
+            ids: this.multipleSelection.map(item => item.id),
             isAllChecked: false,
           };
         }
 
-        this.$https('/subsidyPolicy/deleteSubsidyVehicles', {
+        this.$https('/ncdController/deleteNcds', {
           body: params
         }).then(res => {
           if (res && res.header && res.header.code === '10000') {
@@ -467,7 +467,7 @@ export default {
       this.uploadHistoryVisible = true;
     },
 
-    // 获取字典数据 - 使用真实接口
+    // 获取字典数据
     getDictionaryData() {
       this.$https('/activityPolicy/getActivityPolicyBaseInfo', {
         body: {}
@@ -492,8 +492,8 @@ export default {
 
     // 查看详情
     detail(row) {
-      const vehicleId = row.id || row.vehicleId;
-      this.fetchVehicleDetails(vehicleId);
+      const id = row.id;
+      this.fetchVehicleDetails(id);
     },
 
     // 映射险种数据
@@ -511,11 +511,11 @@ export default {
     },
 
     // 获取车辆详情数据
-    fetchVehicleDetails(vehicleId) {
+    fetchVehicleDetails(id) {
       this.loading = true;
 
-      this.$https('/subsidyPolicy/getVehicleInfo', {
-        body: { vehicleId },
+      this.$https('/ncdController/getNcdInfo', {
+        body: { id },
       }).then(response => {
         if (response && response.body) {
           const data = response.body;
