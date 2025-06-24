@@ -636,12 +636,11 @@ h3 {
 }
 
 .file-name.clickable {
-  text-decoration: underline;
   cursor: pointer;
 }
 
 .file-name.clickable:hover {
-  color: #1C69D4;
+  text-decoration: underline;
 }
 
 .upload-icon.reupload {
@@ -671,7 +670,7 @@ h3 {
 }
 
 .certificate-count {
-  color: #00000099;
+  color: #000000E5;
   font-size: 13px;
   font-weight: 290;
 }
