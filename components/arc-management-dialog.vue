@@ -40,7 +40,9 @@
               <span class="file-name clickable" @click="downloadFile(arcData.finalAuditFile.downloadUrl)">{{
                 arcData.finalAuditFile.fileName }}</span>
             </div>
-            <i class="el-icon-upload2 upload-icon reupload-right" @click="handleArcFinalAudit"></i>
+            <i v-if="!arcData.uploading" class="el-icon-upload2 upload-icon reupload-right"
+              @click="handleArcFinalAudit"></i>
+            <i v-else class="el-icon-loading upload-icon reupload-right"></i>
           </div>
         </div>
 
@@ -129,7 +131,9 @@
               <span class="file-name clickable" @click="downloadFile(arcPremiumData.finalAuditFile.downloadUrl)">{{
                 arcPremiumData.finalAuditFile.fileName }}</span>
             </div>
-            <i class="el-icon-upload2 upload-icon reupload-right" @click="handlePremiumFinalAudit"></i>
+            <i v-if="!arcPremiumData.uploadingFinal" class="el-icon-upload2 upload-icon reupload-right"
+              @click="handlePremiumFinalAudit"></i>
+            <i v-else class="el-icon-loading upload-icon reupload-right"></i>
           </div>
         </div>
 
@@ -264,25 +268,25 @@ export default {
 
       setTimeout(() => {
         // 复杂场景：混合多种状态
-// 场景2：有关联凭证但未上传任何文件 - 全蓝色可用
-this.arcData = {
-  hasArcRelation: true,
-  finalAuditStatus: 'none',
-  uploading: false,
-  finalAuditFile: null
-};
+        // 场景2：有关联凭证但未上传任何文件 - 全蓝色可用
+        this.arcData = {
+          hasArcRelation: true,
+          finalAuditStatus: 'none',
+          uploading: false,
+          finalAuditFile: null
+        };
 
-this.arcPremiumData = {
-  hasArcPremiumRelation: true,
-  certificateCount: 0,
-  lastUploadTime: null,
-  surrenderUploadTime: null,
-  finalAuditStatus: 'none',
-  finalAuditFile: null,
-  uploadingNew: false,
-  uploadingSurrender: false,
-  uploadingFinal: false
-};
+        this.arcPremiumData = {
+          hasArcPremiumRelation: true,
+          certificateCount: 0,
+          lastUploadTime: null,
+          surrenderUploadTime: null,
+          finalAuditStatus: 'none',
+          finalAuditFile: null,
+          uploadingNew: false,
+          uploadingSurrender: false,
+          uploadingFinal: false
+        };
 
         this.loading = false;
       }, 500);
@@ -655,6 +659,9 @@ h3 {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
+  flex-shrink: 0;
+  /* 确保图标基线对齐 */
+  line-height: 1;
 }
 
 .upload-icon.center {
@@ -691,6 +698,22 @@ h3 {
 .el-icon-loading {
   animation: rotating 2s linear infinite;
   color: #1C69D4;
+}
+
+.upload-icon.reupload-right.el-icon-loading {
+  cursor: default;
+  /* loading时不显示手型光标 */
+  animation: rotating-reupload 2s linear infinite;
+}
+
+@keyframes rotating-reupload {
+  0% {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }
 
 @keyframes rotating {
