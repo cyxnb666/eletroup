@@ -40,9 +40,7 @@
               <span class="file-name clickable" @click="downloadFile(arcData.finalAuditFile.downloadUrl)">{{
                 arcData.finalAuditFile.fileName }}</span>
             </div>
-            <i v-if="!arcData.uploading" class="el-icon-upload2 upload-icon reupload-right"
-              @click="handleArcFinalAudit"></i>
-            <i v-else class="el-icon-loading upload-icon reupload-right"></i>
+            <i class="el-icon-upload2 upload-icon reupload-right" @click="handleArcFinalAudit"></i>
           </div>
         </div>
 
@@ -131,9 +129,7 @@
               <span class="file-name clickable" @click="downloadFile(arcPremiumData.finalAuditFile.downloadUrl)">{{
                 arcPremiumData.finalAuditFile.fileName }}</span>
             </div>
-            <i v-if="!arcPremiumData.uploadingFinal" class="el-icon-upload2 upload-icon reupload-right"
-              @click="handlePremiumFinalAudit"></i>
-            <i v-else class="el-icon-loading upload-icon reupload-right"></i>
+            <i class="el-icon-upload2 upload-icon reupload-right" @click="handlePremiumFinalAudit"></i>
           </div>
         </div>
 
@@ -268,25 +264,25 @@ export default {
 
       setTimeout(() => {
         // 复杂场景：混合多种状态
-        // 场景2：有关联凭证但未上传任何文件 - 全蓝色可用
-        this.arcData = {
-          hasArcRelation: true,
-          finalAuditStatus: 'none',
-          uploading: false,
-          finalAuditFile: null
-        };
+// 场景2：有关联凭证但未上传任何文件 - 全蓝色可用
+this.arcData = {
+  hasArcRelation: true,
+  finalAuditStatus: 'none',
+  uploading: false,
+  finalAuditFile: null
+};
 
-        this.arcPremiumData = {
-          hasArcPremiumRelation: true,
-          certificateCount: 0,
-          lastUploadTime: null,
-          surrenderUploadTime: null,
-          finalAuditStatus: 'none',
-          finalAuditFile: null,
-          uploadingNew: false,
-          uploadingSurrender: false,
-          uploadingFinal: false
-        };
+this.arcPremiumData = {
+  hasArcPremiumRelation: true,
+  certificateCount: 0,
+  lastUploadTime: null,
+  surrenderUploadTime: null,
+  finalAuditStatus: 'none',
+  finalAuditFile: null,
+  uploadingNew: false,
+  uploadingSurrender: false,
+  uploadingFinal: false
+};
 
         this.loading = false;
       }, 500);
