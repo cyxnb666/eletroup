@@ -92,8 +92,8 @@
             :disabled="multipleSelection.length === 0">导出明细</el-button>
           <el-button plain icon="el-icon-setting" @click="openActivityManagement" :disabled="!activityName"
             v-if="hasFactoryPermission">活动管理</el-button>
-          <el-button plain icon="el-icon-setting" @click="openArcManagement" 
-            :disabled="multipleSelection.length !== 1">ARC管理</el-button>
+          <el-button plain icon="el-icon-setting" @click="openArcManagement" :disabled="!activityName">ARC管理</el-button>
+          <!-- v-if="permissions.filter(item => item === 'arc-manage').length > 0" -->
         </el-form-item>
       </el-form>
     </div>
@@ -117,7 +117,7 @@
         <el-table-column prop="ckd" label="ckd" align="center"></el-table-column>
         <el-table-column prop="companyName" label="经销商" align="center"></el-table-column>
         <el-table-column prop="batchTotal" label="上传保单总数" align="center"></el-table-column>
-         <el-table-column prop="repairAndContSupCount" label="标签活动支持保单数" align="center"></el-table-column>
+        <el-table-column prop="repairAndContSupCount" label="标签活动支持保单数" align="center"></el-table-column>
         <el-table-column prop="otherSupCount" label="其它获取支持保单数" align="center"></el-table-column>
         <el-table-column prop="supPolCountActual" label="合计获得支持保单数" align="center"></el-table-column>
       </el-table>
@@ -137,10 +137,8 @@
       :activity-name="currentActivity ? currentActivity.activeName : ''" :active-id="activityName"
       :current-activity="currentActivity" />
     <arc-management-dialog :visible.sync="arcManagementVisible"
-  :activity-name="currentActivity ? currentActivity.activeName : ''" 
-  :active-id="activityName"
-  :dept-code="multipleSelection.length > 0 ? multipleSelection[0].deptCode : ''"
-  :current-activity="currentActivity" />
+      :activity-name="currentActivity ? currentActivity.activeName : ''" :active-id="activityName"
+      :current-activity="currentActivity" />
   </div>
 </template>
 
@@ -178,7 +176,8 @@ export default {
       tableLoading: false,
       exportLoading: false,
       refreshLoading: false,
-      activityManagementVisible: false
+      activityManagementVisible: false,
+      permissions: JSON.parse(sessionStorage.getItem('permissions') || '[]'),
     };
   },
   computed: {
@@ -567,10 +566,8 @@ export default {
       }
     },
     openArcManagement() {
-      if (this.multipleSelection.length === 1) {
+      if (this.activityName) {
         this.arcManagementVisible = true;
-      } else {
-        this.$message.warning('请先选择一条记录');
       }
     }
   }

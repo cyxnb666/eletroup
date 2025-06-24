@@ -172,10 +172,6 @@ export default {
       type: String,
       default: ''
     },
-    deptCode: {
-      type: String,
-      default: ''
-    },
     currentActivity: {
       type: Object,
       default: () => ({})
@@ -248,7 +244,7 @@ export default {
   watch: {
     visible(val) {
       this.dialogVisible = val;
-      if (val && this.activeId && this.deptCode) {
+      if (val && this.activeId) {
         this.fetchArcData();
       }
     },
