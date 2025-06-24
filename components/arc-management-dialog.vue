@@ -40,7 +40,9 @@
               <span class="file-name clickable" @click="downloadFile(arcData.finalAuditFile.downloadUrl)">{{
                 arcData.finalAuditFile.fileName }}</span>
             </div>
-            <i class="el-icon-upload2 upload-icon reupload-right" @click="handleArcFinalAudit"></i>
+            <i v-if="!arcData.uploading" class="el-icon-upload2 upload-icon reupload-right"
+              @click="handleArcFinalAudit"></i>
+            <i v-else class="el-icon-loading upload-icon reupload-right"></i>
           </div>
         </div>
 
@@ -129,7 +131,9 @@
               <span class="file-name clickable" @click="downloadFile(arcPremiumData.finalAuditFile.downloadUrl)">{{
                 arcPremiumData.finalAuditFile.fileName }}</span>
             </div>
-            <i class="el-icon-upload2 upload-icon reupload-right" @click="handlePremiumFinalAudit"></i>
+            <i v-if="!arcPremiumData.uploadingFinal" class="el-icon-upload2 upload-icon reupload-right"
+              @click="handlePremiumFinalAudit"></i>
+            <i v-else class="el-icon-loading upload-icon reupload-right"></i>
           </div>
         </div>
 
@@ -264,23 +268,24 @@ export default {
 
       setTimeout(() => {
         // 复杂场景：混合多种状态
+        // 场景2：有关联凭证但未上传任何文件 - 全蓝色可用
         this.arcData = {
-          hasArcRelation: true,         // ARC有关联凭证
-          finalAuditStatus: 'none',     // 终审合格未上传
-          uploading: true,              // 正在上传终审合格文件（loading状态）
+          hasArcRelation: true,
+          finalAuditStatus: 'none',
+          uploading: false,
           finalAuditFile: null
         };
 
         this.arcPremiumData = {
-          hasArcPremiumRelation: true,  // ARC Premium有关联凭证
-          certificateCount: 856,        // 有凭证数据
-          lastUploadTime: '2025/06/20 09:30',
-          surrenderUploadTime: null,    // 凭证退保未上传
-          finalAuditStatus: 'none',     // 终审合格未上传
+          hasArcPremiumRelation: true,
+          certificateCount: 0,
+          lastUploadTime: null,
+          surrenderUploadTime: null,
+          finalAuditStatus: 'none',
           finalAuditFile: null,
-          uploadingNew: false,          // 新增凭证不在上传中
-          uploadingSurrender: true,     // 凭证退保正在上传中（loading状态）
-          uploadingFinal: false         // 终审合格不在上传中
+          uploadingNew: false,
+          uploadingSurrender: false,
+          uploadingFinal: false
         };
 
         this.loading = false;
