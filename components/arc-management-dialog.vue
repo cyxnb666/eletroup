@@ -506,7 +506,6 @@ h3 {
   flex: 1;
 }
 
-/* 禁用状态按钮 */
 .disabled-button {
   display: flex;
   justify-content: space-between;
@@ -520,19 +519,16 @@ h3 {
 
 .disabled-button .button-text {
   color: #00000099;
-  /* 确保禁用状态字体颜色为指定颜色 */
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .disabled-button .upload-icon.disabled,
 .disabled-button .download-icon.disabled {
   color: #00000099;
-  /* 确保禁用状态图标颜色为指定颜色 */
   font-size: 18px;
 }
 
-/* 可用状态按钮 */
 .active-button {
   display: flex;
   justify-content: space-between;
@@ -548,7 +544,7 @@ h3 {
 .active-button .button-text {
   color: #000000E5;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .active-button .upload-icon.active,
@@ -557,7 +553,6 @@ h3 {
   font-size: 18px;
 }
 
-/* 已上传状态按钮 */
 .uploaded-button {
   display: flex;
   justify-content: space-between;
@@ -569,7 +564,6 @@ h3 {
   background-color: #F3F3F3;
 }
 
-/* 带标题的已上传状态按钮 */
 .uploaded-button-with-title {
   display: flex;
   flex-direction: column;
@@ -584,7 +578,7 @@ h3 {
 .button-title {
   color: #000000E5;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   margin-bottom: 4px;
 }
 
@@ -620,9 +614,8 @@ h3 {
 
 .surrender-time {
   color: #909399;
-  font-size: 10px;
+  font-size: 12px;
   text-align: left;
-  margin-top: 4px;
 }
 
 .file-info {
@@ -630,7 +623,6 @@ h3 {
   align-items: center;
   margin-top: 4px;
   padding-right: 30px;
-  /* 为右侧图标留出空间 */
 }
 
 .file-name {
@@ -674,25 +666,22 @@ h3 {
   margin-bottom: auto;
 }
 
-/* 新增凭证特殊样式 */
 .certificate-count {
-  color: #000000E5;
+  color: #00000099;
   font-size: 13px;
-  font-weight: normal;
-  /* 去掉加粗 */
+  font-weight: 290;
 }
 
 .data-icon {
-  color: #000000E5;
+  color: #00000099;
   font-size: 12px;
 }
 
 .upload-time {
   color: #909399;
-  font-size: 10px;
+  font-size: 12px;
 }
 
-/* 新增凭证已上传状态的特殊处理 */
 .uploaded-button .upload-icon.active,
 .uploaded-button-with-title .upload-icon.active {
   color: #1C69D4;
@@ -721,7 +710,6 @@ h3 {
   text-align: right;
 }
 
-/* 对话框整体样式调整 */
 /deep/ .el-dialog {
   margin-top: 8vh !important;
 }
