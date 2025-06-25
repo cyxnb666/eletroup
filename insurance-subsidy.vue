@@ -22,50 +22,110 @@
     <!-- 查询条件表单 -->
     <div class="insurance-search">
       <el-form :model="queryForm" class="search-form" ref="queryForm" label-position="top">
-        <el-row :gutter="20">
-          <el-col :span="6">
-            <el-form-item label="车架号" prop="frmNo">
-              <el-input v-model="queryForm.frmNo" placeholder="请输入" maxlength="17" clearable></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="商业险保单号" prop="vciPolicyNo">
-              <el-input v-model="queryForm.vciPolicyNo" placeholder="请输入" maxlength="50" clearable></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="购车发票号" prop="invoiceNo">
-              <el-input v-model="queryForm.invoiceNo" placeholder="请输入" maxlength="50" clearable></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="保险公司" prop="vciInsId">
-              <el-select v-model="queryForm.vciInsId" placeholder="请选择" clearable filterable style="width: 100%">
-                <el-option v-for="item in insCompanyList" :key="item.value" :label="item.label"
-                  :value="item.value"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <div v-show="showAllConditions">
+        <!-- 有经销商权限的布局 -->
+        <div v-if="hasProductManagementCopyPermission">
           <el-row :gutter="20">
             <el-col :span="6">
-              <el-form-item label="更新时间" prop="updateTime">
-                <el-date-picker v-model="queryForm.updateTime" type="daterange" range-separator="至"
-                  start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd" style="width: 100%">
-                </el-date-picker>
+              <el-form-item label="经销商" prop="deptName">
+                <el-select v-model="queryForm.deptName" filterable placeholder="请选择" clearable style="width: 100%">
+                  <el-option v-for="item in dealerList" :key="item.value" :label="item.label" :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="6">
-              <el-form-item label="车型" prop="vehicleName">
-                <el-input v-model="queryForm.vehicleName" placeholder="请输入" maxlength="50" clearable></el-input>
+              <el-form-item label="车架号" prop="frmNo">
+                <el-input v-model="queryForm.frmNo" placeholder="请输入" maxlength="17" clearable></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <!-- 占位，保持布局一致 -->
+            <el-col :span="6">
+              <el-form-item label="商业险保单号" prop="vciPolicyNo">
+                <el-input v-model="queryForm.vciPolicyNo" placeholder="请输入" maxlength="50" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="购车发票号" prop="invoiceNo">
+                <el-input v-model="queryForm.invoiceNo" placeholder="请输入" maxlength="50" clearable></el-input>
+              </el-form-item>
             </el-col>
           </el-row>
+
+          <div v-show="showAllConditions">
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="保险公司" prop="vciInsId">
+                  <el-select v-model="queryForm.vciInsId" placeholder="请选择" clearable filterable style="width: 100%">
+                    <el-option v-for="item in insCompanyList" :key="item.value" :label="item.label"
+                      :value="item.value"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="更新时间" prop="updateTime">
+                  <el-date-picker v-model="queryForm.updateTime" type="daterange" range-separator="至"
+                    start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd" style="width: 100%">
+                  </el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="车型" prop="vehicleName">
+                  <el-input v-model="queryForm.vehicleName" placeholder="请输入" maxlength="50" clearable></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <!-- 占位，保持布局一致 -->
+              </el-col>
+            </el-row>
+          </div>
+        </div>
+
+        <!-- 没有经销商权限的布局 -->
+        <div v-else>
+          <el-row :gutter="20">
+            <el-col :span="6">
+              <el-form-item label="车架号" prop="frmNo">
+                <el-input v-model="queryForm.frmNo" placeholder="请输入" maxlength="17" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="商业险保单号" prop="vciPolicyNo">
+                <el-input v-model="queryForm.vciPolicyNo" placeholder="请输入" maxlength="50" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="购车发票号" prop="invoiceNo">
+                <el-input v-model="queryForm.invoiceNo" placeholder="请输入" maxlength="50" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="保险公司" prop="vciInsId">
+                <el-select v-model="queryForm.vciInsId" placeholder="请选择" clearable filterable style="width: 100%">
+                  <el-option v-for="item in insCompanyList" :key="item.value" :label="item.label"
+                    :value="item.value"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <div v-show="showAllConditions">
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="更新时间" prop="updateTime">
+                  <el-date-picker v-model="queryForm.updateTime" type="daterange" range-separator="至"
+                    start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd" style="width: 100%">
+                  </el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="车型" prop="vehicleName">
+                  <el-input v-model="queryForm.vehicleName" placeholder="请输入" maxlength="50" clearable></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <!-- 占位，保持布局一致 -->
+              </el-col>
+            </el-row>
+          </div>
         </div>
 
         <!-- 操作按钮部分 -->
@@ -79,11 +139,11 @@
         <div class="actions-container">
           <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
           <el-button plain icon="el-icon-refresh-left" @click="reset">重置</el-button>
-          <div class="vertical-divider"></div>
-          <el-button plain icon="el-icon-delete" @click="deleteItems"
+          <div class="vertical-divider" v-if="isDealerPermission"></div>
+          <el-button plain icon="el-icon-delete" @click="deleteItems" v-if="isDealerPermission"
             :disabled="multipleSelection.length === 0 && !checkedAll">删除</el-button>
-          <div class="vertical-divider"></div>
-          <el-button plain icon="el-icon-time" @click="showUploadHistory">上传历史</el-button>
+          <div class="vertical-divider" v-if="isDealerPermission"></div>
+          <el-button plain icon="el-icon-time" @click="showUploadHistory" v-if="isDealerPermission">上传历史</el-button>
           <div class="double-click-tip">
             <img src="@/assets/icon/error-circle.svg" class="error-icon" alt="error-icon" />
             <span>双击数据查看保单详情</span>
@@ -106,7 +166,8 @@
               v-model="scope.row.isSelected"></el-checkbox>
           </template>
         </el-table-column>
-        <el-table-column prop="deptName" label="经销商" align="center"></el-table-column>
+        <el-table-column prop="deptName" label="经销商" align="center"
+          v-if="hasProductManagementCopyPermission"></el-table-column>
         <el-table-column prop="frmNo" label="车架号" align="center"></el-table-column>
         <el-table-column prop="vciInsName" label="保险公司" align="center"></el-table-column>
         <el-table-column prop="vciPolicyNo" label="商业险保单号" align="center" width="150"></el-table-column>
@@ -116,6 +177,7 @@
             {{ scope.row.isElectricVehicle === '1' ? '是' : '否' }}
           </template>
         </el-table-column>
+        <el-table-column prop="invoiceDate" label="开票日期" align="center"></el-table-column>
         <el-table-column prop="fstRegNo" label="初登日期" align="center"></el-table-column>
         <el-table-column prop="updateTime" label="更新时间" align="center"></el-table-column>
       </el-table>
@@ -155,6 +217,7 @@ import UploadMaterialDialog from './components/UploadMaterialDialog.vue'
 import UploadHistoryDialog from './components/UploadHistoryDialog.vue'
 import VehicleDetailDialog from './components/VehicleDetailDialog.vue'
 import { getInsuranceCompanies } from '@/utils/commonApi'
+import { getReportDropdownList } from '@/views/modules/daibu-insurance/daibuche-common.js'
 
 export default {
   name: 'InsuranceSubsidy',
@@ -187,7 +250,9 @@ export default {
         cvrgList: [], // 险种列表
         newEnergyCvrgList: [], // 新能源险种列表
       },
+      dealerList: [], // 经销商列表
       queryForm: {
+        deptName: '',
         updateTime: [],
         frmNo: '',
         vciPolicyNo: '',
@@ -227,12 +292,24 @@ export default {
     isUploadDisabled() {
       return this.isActivityExpired || !this.activityList.length;
     },
+    hasProductManagementCopyPermission() {
+      const permissions = JSON.parse(sessionStorage.getItem('permissions') || '[]')
+      return permissions.some(permission =>
+        [
+          'daibu-report-overview-changshang', //厂商
+          'daibu-report-overview-dq', // 大区
+          'daibu-report-overview-ins', // 保险公司
+          'daibu-report-overview-jt', // 集团
+        ].includes(permission),
+      )
+    },
   },
   created() {
     this.getActivityList();
     this.getInsuranceCompanies();
     this.getUploadProtocol();
     this.getDictionaryData();
+    this.getDealerList();
   },
   methods: {
     search() {
@@ -255,7 +332,25 @@ export default {
       this.$refs.queryForm.resetFields();
       this.queryForm.updateTime = [];
     },
-
+    // 获取经销商列表
+    getDealerList() {
+      getReportDropdownList()
+        .then(result => {
+          if (result && result.dealerList && Array.isArray(result.dealerList)) {
+            this.dealerList = result.dealerList.map(item => ({
+              label: item.label,
+              value: item.value,
+            }))
+          } else {
+            this.dealerList = []
+          }
+        })
+        .catch(error => {
+          console.error('获取经销商列表失败:', error)
+          this.$message.error('获取经销商列表失败')
+          this.dealerList = []
+        })
+    },
     // 获取活动列表
     getActivityList() {
       this.$https('/ncdController/getNcdActiveTypeList', {
@@ -345,6 +440,7 @@ export default {
 
       const params = {
         activeId: this.activityName || '',
+        deptCodeList: this.queryForm.deptName ? [this.queryForm.deptName] : [],
         updateStartTime: this.queryForm.updateTime && this.queryForm.updateTime[0] ? this.queryForm.updateTime[0] : '',
         updateEndTime: this.queryForm.updateTime && this.queryForm.updateTime[1] ? this.queryForm.updateTime[1] : '',
         frmNo: this.queryForm.frmNo || '',
@@ -408,6 +504,7 @@ export default {
           // 勾选"全选"时，传递查询条件参数
           params = {
             activeId: this.activityName || '',
+            deptCode: this.queryForm.deptName || '',
             isAllChecked: true,
             updateStartTime: this.queryForm.updateTime && this.queryForm.updateTime[0] ? this.queryForm.updateTime[0] : '',
             updateEndTime: this.queryForm.updateTime && this.queryForm.updateTime[1] ? this.queryForm.updateTime[1] : '',

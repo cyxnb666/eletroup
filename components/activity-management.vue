@@ -334,8 +334,8 @@ export default {
           if (response && response.header && response.header.code === "10000") {
             this.$message.success('上传成功');
 
-            this.renovationFiles = fileFormList.map(item => item.fileName);
-            this.renovationUploadTime = this.formatDate(new Date());
+            // 重新获取最新的文件数据
+            this.fetchActivityFiles();
           } else {
             // this.$message.error('上传失败: ' + (response.header.message || '未知错误'));
           }
@@ -393,8 +393,8 @@ export default {
         if (response && response.header && response.header.code === "10000") {
           this.$message.success('上传成功');
 
-          this.finalFiles = [file.name];
-          this.finalUploadTime = this.formatDate(new Date());
+          // 重新获取最新的文件数据
+          this.fetchActivityFiles();
         } else {
           // this.$message.error('上传失败: ' + (response.header.message || '未知错误'));
         }
@@ -430,14 +430,17 @@ export default {
         }).then(res => {
           if (res && res.header && res.header.code === "10000") {
             // 删除成功
-            if (type === 'renovation') {
-              this.renovationFiles = [];
-              this.renovationUploadTime = '';
-            } else {
-              this.finalFiles = [];
-              this.finalUploadTime = '';
-            }
+            // if (type === 'renovation') {
+            //   this.renovationFiles = [];
+            //   this.renovationUploadTime = '';
+            // } else {
+            //   this.finalFiles = [];
+            //   this.finalUploadTime = '';
+            // }
             this.$message.success('删除成功');
+
+            // 重新获取最新的文件数据
+            this.fetchActivityFiles();
           } else {
             // this.$message.error('删除失败: ' + (res.header.message || '未知错误'));
           }

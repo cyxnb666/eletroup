@@ -19,7 +19,7 @@
       <div class="upload-container">
         <div class="upload-button-area" v-if="!isUploading && !uploadComplete">
           <el-button class="select-file-btn" size="medium" @click="triggerUpload">选择文件</el-button>
-          <span class="upload-tips">支持批量上传文件，文件格式仅限PDF，最多只能上传 30 份文件</span>
+          <span class="upload-tips">支持批量上传文件，文件格式仅限PDF，最多只能上传 500 份文件</span>
         </div>
 
         <div class="upload-button-area" v-if="uploadComplete">
@@ -80,7 +80,7 @@
     </div>
 
     <span slot="footer" class="dialog-footer">
-      <el-button @click="handleCancel" v-if="!isUploading && !uploadComplete">取消</el-button>
+      <el-button plain @click="handleCancel" v-if="!isUploading && !uploadComplete">取消</el-button>
       <el-button type="primary" :disabled="isUploadButtonDisabled" @click="handleUpload" :loading="isUploading"
         v-if="!uploadComplete">
         {{ isUploading ? '上传中' : '点击上传' }}
@@ -168,7 +168,7 @@ export default {
       const files = event.target.files
       if (files) {
         for (let i = 0; i < files.length; i++) {
-          if (this.fileList.length < 30) {
+          if (this.fileList.length < 500) {
             // 只接受PDF文件
             if (files[i].type === 'application/pdf' || files[i].name.toLowerCase().endsWith('.pdf')) {
               const file = files[i];
@@ -180,7 +180,7 @@ export default {
               this.$message.error('只能上传PDF文件');
             }
           } else {
-            this.$message.warning('最多只能上传30份文件');
+            this.$message.warning('最多只能上传500份文件');
             break;
           }
         }
@@ -241,14 +241,14 @@ export default {
       const files = event.dataTransfer.files;
       for (let i = 0; i < files.length; i++) {
         if (files[i].type === 'application/pdf' || files[i].name.toLowerCase().endsWith('.pdf')) {
-          if (this.fileList.length < 30) {
+          if (this.fileList.length < 500) {
             const file = files[i];
             // 为每个文件添加状态属性
             this.$set(file, 'status', 'ready');
             this.$set(file, 'percentage', 0);
             this.fileList.push(file);
           } else {
-            this.$message.warning('最多只能上传30份文件');
+            this.$message.warning('最多只能上传500份文件');
             break;
           }
         } else {
