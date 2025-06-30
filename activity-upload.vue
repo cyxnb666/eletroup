@@ -1,6 +1,22 @@
 <template>
   <div class="insurance-accident-car-management" v-loading="deleteLoading || exportLoading">
     <!-- 顶部统计卡片 -->
+    <div class="activity-selection-area">
+      <span>活动名称<span class="required">*</span></span>
+      <el-select v-model="activityName" placeholder="请选择" @change="handleActivityChange" no-data-text="无活动"
+        class="activity-select">
+        <el-option v-for="item in activityList" :key="item.activeId" :label="item.activeName" :value="item.activeId">
+        </el-option>
+      </el-select>
+      <el-button type="primary" icon="el-icon-upload" @click="showUploadDialog" :disabled="isUploadDisabled"
+        v-if="!shouldHideOperationButtons">
+        上传保单(PDF)
+      </el-button>
+      <el-button size="large" icon="el-icon-refresh" type="text" @click="refreshdata"
+        :disabled="!activityList.length">刷新</el-button>
+    </div>
+
+    <!-- 统计卡片 -->
     <div class="statistics-cards" v-loading="refreshLoading">
       <div class="stat-card">
         <div class="stat-header">
@@ -32,21 +48,29 @@
         <div class="stat-value green">{{ supportedPolicies }}</div>
       </div>
 
-      <div class="activity-name-section">
+      <div class="stat-card">
         <div class="stat-header">
-          <span>活动名称<span class="required">*</span></span>
-          <el-button size="large" icon="el-icon-refresh" type="text" @click="refreshdata"
-            :disabled="!activityList.length">刷新</el-button>
+          <span>宝驾计划（基础版）单数</span>
+          <el-tooltip effect="dark" content="当前选择活动获得奖励的ARC单数" placement="top">
+            <i class="el-icon-info"></i>
+          </el-tooltip>
         </div>
-        <div class="input-with-button">
-          <el-select v-model="activityName" placeholder="请选择" @change="handleActivityChange" no-data-text="无活动">
-            <el-option v-for="item in activityList" :key="item.activeId" :label="item.activeName"
-              :value="item.activeId"> </el-option>
-          </el-select>
-          <el-button type="primary" icon="el-icon-upload" @click="showUploadDialog" :disabled="isUploadDisabled"
-            v-if="!shouldHideOperationButtons">
-            上传保单(PDF)
-          </el-button>
+        <div class="stat-value-with-download">
+          <span class="stat-value green downloadable-number" @click="downloadBaoJiaBasic">{{ baoJiaBasicCount }}</span>
+          <el-button size="mini" icon="el-icon-download" type="text" @click="downloadBaoJiaBasic"></el-button>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>宝驾计划（尊享版）单数</span>
+          <el-tooltip effect="dark" content="当前选择活动获得奖励的ARC Premium单数" placement="top">
+            <i class="el-icon-info"></i>
+          </el-tooltip>
+        </div>
+        <div class="stat-value-with-download">
+          <span class="stat-value green downloadable-number" @click="downloadBaoJiaVip">{{ baoJiaVipCount }}</span>
+          <el-button size="mini" icon="el-icon-download" type="text" @click="downloadBaoJiaVip"></el-button>
         </div>
       </div>
     </div>
@@ -278,7 +302,7 @@
           <template slot-scope="scope">
             <span :class="'dataStatus-' + scope.row.dataStatus">
               {{ scope.row.dataStatus === '1' ? '信息不全' : scope.row.dataStatus === '2' ? '未达标' : scope.row.dataStatus ===
-              '3' ? '初审合格' : scope.row.dataStatus === '4' ? '终审合格' : scope.row.dataStatus }}
+                '3' ? '初审合格' : scope.row.dataStatus === '4' ? '终审合格' : scope.row.dataStatus }}
             </span>
           </template>
         </el-table-column>
@@ -399,11 +423,11 @@ export default {
     tableHeight() {
       // 如果未展开查询条件，使用基础高度
       if (!this.showAllConditions) {
-        return 'calc(100vh - 483px)'
+        return 'calc(100vh - 525px)'
       }
 
       // 展开查询条件时的高度
-      return 'calc(100vh - 603px)'
+      return 'calc(100vh - 648px)'
     },
     // 权限检查
     hasProductManagementCopyPermission() {
@@ -456,6 +480,26 @@ export default {
     // 上传按钮是否禁用
     isUploadDisabled() {
       return this.isActivityExpired || !this.activityList.length
+    },
+
+    // 宝驾计划基础版单数
+    baoJiaBasicCount() {
+      if (!this.activityList.length) return 'N/A';
+
+      if (this.activityDetails) {
+        return this.formatNumber(this.activityDetails.arcSupCount || 0);
+      }
+      return 'N/A';
+    },
+
+    // 宝驾计划尊享版单数  
+    baoJiaVipCount() {
+      if (!this.activityList.length) return 'N/A';
+
+      if (this.activityDetails) {
+        return this.formatNumber(this.activityDetails.arcPremiumSupCount || 0);
+      }
+      return 'N/A';
     },
   },
   created() {
@@ -748,7 +792,7 @@ export default {
               this.deleteLoading = false
             })
         })
-        .catch(() => {})
+        .catch(() => { })
     },
     showUploadHistory() {
       this.uploadHistoryVisible = true
@@ -993,7 +1037,7 @@ export default {
 
       // 构建查询参数
       const params = {
-        tag: this.queryForm.tag || '', 
+        tag: this.queryForm.tag || '',
         activeId: this.activityName || '',
         dataStatusList: Array.isArray(this.queryForm.uploadStatus) ? this.queryForm.uploadStatus : this.queryForm.uploadStatus ? [this.queryForm.uploadStatus] : [],
         updateStartTime: this.queryForm.dateRange && this.queryForm.dateRange[0] ? this.queryForm.dateRange[0] : '',
@@ -1065,24 +1109,27 @@ export default {
     },
     // 获取活动详细数据
     getActivityDetails(activeId) {
-      if (!activeId) return
+      if (!activeId) return;
 
       this.$https('/activityPolicy/getActivityPolicyTotal', {
-        body: { activeId },
+        body: {
+          activeId,
+          arcStatisticsStatus: false
+        },
       })
         .then(response => {
           if (response && response.body) {
-            this.activityDetails = response.body
+            this.activityDetails = response.body;
           } else {
-            this.$message.error('获取活动详情失败')
-            this.activityDetails = null
+            this.$message.error('获取活动详情失败');
+            this.activityDetails = null;
           }
         })
         .catch(error => {
-          console.error('获取活动详情失败:', error)
-          this.$message.error('获取活动详情失败')
-          this.activityDetails = null
-        })
+          console.error('获取活动详情失败:', error);
+          this.$message.error('获取活动详情失败');
+          this.activityDetails = null;
+        });
     },
 
     formatNumber(value) {
@@ -1121,6 +1168,83 @@ export default {
         this.currentPage = 1 // 重置到第一页
         this.fetchPolicyList()
       }
+    },
+    // 宝驾计划基础版下载
+    downloadBaoJiaBasic() {
+      if (!this.activityName) {
+        this.$message.warning('请先选择活动');
+        return;
+      }
+
+      this.exportLoading = true;
+
+      this.$https('/eventDashboard/exportArcStatisticsIssueFile', {
+        body: {
+          activeId: this.activityName,
+          arcIssueType: "1"
+        }
+      }).then(res => {
+        if (res) {
+          const downloadUrl = res.body;
+          if (downloadUrl) {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            this.$message.success('宝驾计划基础版数据导出成功');
+          } else {
+            this.$message.error('导出失败：未获取到下载链接');
+          }
+        } else {
+          this.$message.error('宝驾计划基础版数据导出失败');
+        }
+      }).catch(error => {
+        console.error('宝驾计划基础版数据导出失败:', error);
+        this.$message.error('导出失败，请重试');
+      }).finally(() => {
+        this.exportLoading = false;
+      });
+    },
+
+    // 宝驾计划尊享版下载  
+    downloadBaoJiaVip() {
+      if (!this.activityName) {
+        this.$message.warning('请先选择活动');
+        return;
+      }
+
+      this.exportLoading = true;
+
+      this.$https('/eventDashboard/exportArcStatisticsIssueFile', {
+        body: {
+          activeId: this.activityName,
+          arcIssueType: "2"
+        }
+      }).then(res => {
+        if (res) {
+          const downloadUrl = res.body;
+          if (downloadUrl) {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            this.$message.success('宝驾计划尊享版数据导出成功');
+          } else {
+            this.$message.error('导出失败：未获取到下载链接');
+          }
+        } else {
+          this.$message.error('宝驾计划尊享版数据导出失败');
+        }
+      }).catch(error => {
+        console.error('宝驾计划尊享版数据导出失败:', error);
+        this.$message.error('导出失败，请重试');
+      }).finally(() => {
+        this.exportLoading = false;
+      });
     },
   },
 }
@@ -1263,13 +1387,6 @@ export default {
   padding: 12px;
 }
 
-.activity-name-section {
-  flex: 3;
-  /* 占据约一半宽度 */
-  padding: 15px 20px;
-  box-sizing: border-box;
-}
-
 .paginationPart {
   display: flex;
   justify-content: space-between;
@@ -1328,6 +1445,53 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.activity-selection-area {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 0;
+  color: #606266;
+  font-size: 14px;
+}
+
+.activity-selection-area .el-button {
+  margin-left: auto;
+}
+
+.activity-selection-area .el-button:hover {
+  text-decoration: underline;
+}
+
+.activity-select {
+  width: 300px;
+}
+
+.stat-value-with-download {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-value-with-download .el-button {
+  color: #2BA471;
+  font-size: 20px;
+  padding: 0;
+  min-height: auto;
+}
+
+.stat-value-with-download .el-button:hover {
+  color: #2BA471;
+}
+
+.downloadable-number {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.downloadable-number:hover {
+  text-decoration: underline;
 }
 
 /deep/ .el-form-item--mini .el-form-item__label {
