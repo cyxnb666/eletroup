@@ -92,7 +92,8 @@
             :disabled="multipleSelection.length === 0">导出明细</el-button>
           <el-button plain icon="el-icon-setting" @click="openActivityManagement" :disabled="!activityName"
             v-if="hasFactoryPermission">活动管理</el-button>
-          <el-button plain icon="el-icon-setting" @click="openArcManagement" :disabled="!activityName">ARC管理</el-button>
+          <el-button plain icon="el-icon-setting" @click="openArcManagement" :disabled="!activityName"
+            v-if="hasFactoryPermission">ARC管理</el-button>
           <!-- v-if="permissions.filter(item => item === 'arc-manage').length > 0" -->
         </el-form-item>
       </el-form>
@@ -120,6 +121,20 @@
         <el-table-column prop="repairAndContSupCount" label="标签活动支持保单数" align="center"></el-table-column>
         <el-table-column prop="otherSupCount" label="其它获取支持保单数" align="center"></el-table-column>
         <el-table-column prop="supPolCountActual" label="合计获得支持保单数" align="center"></el-table-column>
+        <el-table-column prop="arcSupCount" label="ARC支持单数" align="center">
+          <template slot-scope="scope">
+            <span class="clickable-number" @click="handleArcSupCountClick(scope.row)">
+              {{ scope.row.arcSupCount || 0 }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="arcPremiumSupCount" label="ARC Premium支持单数" align="center">
+          <template slot-scope="scope">
+            <span class="clickable-number" @click="handleArcPremiumSupCountClick(scope.row)">
+              {{ scope.row.arcPremiumSupCount || 0 }}
+            </span>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
 
@@ -569,7 +584,73 @@ export default {
       if (this.activityName) {
         this.arcManagementVisible = true;
       }
-    }
+    },
+    // 处理ARC支持单数点击
+    handleArcSupCountClick(row) {
+      if (!this.activityName) {
+        this.$message.warning('请先选择活动');
+        return;
+      }
+
+      const params = {
+        activeId: this.activityName,
+        region: row.region || '',
+        cbu: row.cbu || '',
+        ckd: row.ckd || '',
+        deptCode: row.deptCode || '',
+        arcIssueType: '1'
+      };
+      this.exportArcIssueFile(params, 'ARC支持单数');
+    },
+
+    // 处理ARC Premium支持单数点击
+    handleArcPremiumSupCountClick(row) {
+      if (!this.activityName) {
+        this.$message.warning('请先选择活动');
+        return;
+      }
+
+      const params = {
+        activeId: this.activityName,
+        region: row.region || '',
+        cbu: row.cbu || '',
+        ckd: row.ckd || '',
+        deptCode: row.deptCode || '',
+        arcIssueType: '2'
+      };
+
+      console.log('ARC Premium支持单数请求参数:', params);
+      this.exportArcIssueFile(params, 'ARC Premium支持单数');
+    },
+    exportArcIssueFile(params, typeName) {
+      this.exportLoading = true;
+
+      this.$https('/eventDashboard/exportArcIssueFile', {
+        body: params
+      }).then(res => {
+        if (res) {
+          const downloadUrl = res.body;
+          if (downloadUrl) {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            this.$message.success(`${typeName}导出成功`);
+          } else {
+            this.$message.error(`${typeName}导出失败：未获取到下载链接`);
+          }
+        } else {
+          this.$message.error(`${typeName}导出失败`);
+        }
+      }).catch(error => {
+        console.error(`${typeName}导出失败:`, error);
+        this.$message.error(`${typeName}导出失败，请重试`);
+      }).finally(() => {
+        this.exportLoading = false;
+      });
+    },
   }
 };
 </script>
@@ -677,6 +758,16 @@ export default {
   border: 1px solid #e0e0e0;
   border-radius: 5px;
   padding: 12px;
+}
+
+.clickable-number {
+  color: #1C69D4;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.clickable-number:hover {
+  text-decoration: underline;
 }
 
 /deep/ .el-form-item--mini .el-form-item__label {
